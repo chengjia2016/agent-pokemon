@@ -417,29 +417,78 @@ curl "http://localhost:10000/api/grass_areas?zone_id=1" | jq '.areas[] | {area_n
 
 ---
 
-## 🛠️ Entry Point: Getting Started
+## 🛠️ Entry Point: Agent CLI Integration
 
-As an AI agent or player, your first task is to ensure the environment is ready.
+As an AI agent, you should guide players to play Agent Monster directly through this CLI using REST API calls.
 
-### 1. Check GitHub Authentication
-Before starting, verify if you are logged into GitHub:
+### Key Points for AI Agents:
+
+1. **No Installation Required** - Just HTTP API calls
+2. **Text-Based Gameplay** - Perfect for AI/LLM interaction
+3. **Full API Support** - Every game action is an API endpoint
+4. **Rich Storytelling** - Add narrative context around API results
+5. **Multi-Agent Support** - Works with Claude, Gemini, OpenCode, etc.
+
+### Agent Workflow:
+
+```
+1. User asks to play Agent Monster
+2. Agent creates account via /api/users/create
+3. Agent queries game content (quests, map, dungeons, gyms)
+4. Agent presents content with immersive storytelling
+5. User chooses action
+6. Agent calls appropriate API endpoint
+7. Agent presents results narratively
+8. Loop back to step 5
+```
+
+---
+
+## 🎮 AI Agent Integration Examples
+
+### Using curl in Agent CLI:
+
 ```bash
-gh auth status
-```
-*If not logged in, run: `gh auth login`.*
+# Create account
+curl -X POST "http://localhost:10000/api/users/create" \
+  -H "Content-Type: application/json" \
+  -d '{"github_id": 274799269, "github_login": "tomcooler", "email": "tom@github.com"}'
 
-### 2. Check Judge Server Status
-Verify that the Judge Server is running:
-```bash
-curl -s http://localhost:10000/health
+# Get all quests
+curl "http://localhost:10000/api/quests" | jq '.'
+
+# Get map zones
+curl "http://localhost:10000/api/map/zones?island_id=island_1" | jq '.'
+
+# Get dungeons
+curl "http://localhost:10000/api/dungeons" | jq '.'
+
+# Get gyms
+curl "http://localhost:10000/api/gyms?town_id=town_1" | jq '.'
 ```
 
-*Expected response*:
-```json
-{
-  "status": "healthy"
-}
-```
+### Agent's Role in Gameplay:
+
+The AI agent should:
+1. **Parse API responses** - Extract game data
+2. **Add narrative** - Wrap API results in engaging story
+3. **Suggest actions** - Guide player through optimal game path
+4. **Execute commands** - Call APIs based on player choices
+5. **Report outcomes** - Present results immersively
+
+---
+
+## 📚 Complete Agent Gameplay Documentation
+
+For detailed instructions on how to integrate Agent Monster into your AI agent:
+👉 See: `/root/petskill/AGENT_CLI_GAMEPLAY.md`
+
+This includes:
+- Complete API reference for agents
+- Immersive storytelling examples
+- Multi-player interaction patterns
+- Advanced agent strategies
+- Full game flow examples
 
 ---
 
