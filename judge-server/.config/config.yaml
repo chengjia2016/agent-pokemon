@@ -1,0 +1,21 @@
+server:
+  host: 0.0.0.0
+  port: 10000
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: ""
+  dbname: agent_monster
+  sslmode: disable
+
+github:
+  token: ""
+  owner: chengjia2016
+  repo: agent-monster
+
+settlement:
+  daily_time: "00:00"
+  sync_to_github: false
+  sync_interval_seconds: 300

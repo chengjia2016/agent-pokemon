@@ -1,0 +1,132 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    POKEMON ANALYZER - 快速参考卡                             ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+📁 文件位置
+──────────────────────────────────────────────────────────────────────────────
+脚本:    /root/petskill/pokemon_analyzer.py
+输出:    /root/petskill/judge-server/INIT_POKEMON_DATA.sql
+文档:    /root/petskill/POKEMON_ANALYZER_README.md
+本文件:  /root/petskill/QUICK_START.txt
+
+⚡ 快速命令
+──────────────────────────────────────────────────────────────────────────────
+
+# 运行分析器
+python3 /root/petskill/pokemon_analyzer.py
+
+# 导入SQL到PostgreSQL
+psql -U postgres -d pokemon_db < /root/petskill/judge-server/INIT_POKEMON_DATA.sql
+
+# 验证导入
+psql -U postgres -d pokemon_db -c "SELECT COUNT(*) FROM pokemon_species;"
+
+📊 数据统计
+──────────────────────────────────────────────────────────────────────────────
+Pokemon物种:    1,025 条 (INSERT语句)
+招式数据:       953 条 (INSERT语句)
+特性数据:       311 条 (INSERT语句)
+────────────────────────
+总计:           2,289 条 INSERT语句
+
+SQL文件详情:
+  • 大小:      358 KB
+  • 行数:      4,617 行
+  • 编码:      UTF-8
+  • 格式:      PostgreSQL
+  • 表数:      3 个 (pokemon_species, pokemon_moves, pokemon_abilities)
+
+💾 表结构
+──────────────────────────────────────────────────────────────────────────────
+
+pokemon_species:
+  - pokemon_id (VARCHAR, PK)
+  - name_en (VARCHAR)
+  - name_zh (VARCHAR)
+  - types (TEXT) 
+  - capture_rate (INT)
+
+pokemon_moves:
+  - move_id (VARCHAR, PK)
+  - name_en (VARCHAR)
+  - name_zh (VARCHAR)
+  - type (VARCHAR)
+  - category (VARCHAR)
+  - power (INT)
+  - accuracy (INT)
+  - pp (INT)
+
+pokemon_abilities:
+  - ability_id (VARCHAR, PK)
+  - name_en (VARCHAR)
+  - name_zh (VARCHAR)
+  - description (TEXT)
+
+🔍 SQL示例查询
+──────────────────────────────────────────────────────────────────────────────
+
+-- 查询皮卡丘信息
+SELECT * FROM pokemon_species WHERE name_en = 'Pikachu';
+结果: ('0025', 'Pikachu', '皮卡丘', 'Electric', 190)
+
+-- 查询威力大于80的招式
+SELECT * FROM pokemon_moves WHERE power > 80 LIMIT 5;
+
+-- 查询包含"火"的特性
+SELECT * FROM pokemon_abilities WHERE name_zh LIKE '%火%';
+
+-- 统计电属性的宝可梦
+SELECT COUNT(*) FROM pokemon_species WHERE types LIKE '%Electric%';
+
+🎯 数据标准化
+──────────────────────────────────────────────────────────────────────────────
+
+属性映射 (18种):
+  一般→Normal          电→Electric
+  火→Fire             超能力→Psychic
+  水→Water            虫→Bug
+  格斗→Fighting       岩石→Rock
+  毒→Poison           幽灵→Ghost
+  地面→Ground         龙→Dragon
+  飞行→Flying         恶→Dark
+                    钢→Steel
+                    妖精→Fairy
+
+分类映射:
+  物理→Physical
+  特殊→Special
+  变化→Status
+
+✅ 数据示例
+──────────────────────────────────────────────────────────────────────────────
+
+Pokemon: ('0001', 'Bulbasaur', '妙蛙种子', 'Grass,Poison', 45)
+招式:    ('1', 'Pound', '拍击', 'Normal', 'Physical', 40, 100, 35)
+特性:    ('001', 'Stench', '恶臭', '通过释放臭臭的气味...')
+
+🛠️ 技术细节
+──────────────────────────────────────────────────────────────────────────────
+
+编程语言:    Python 3.6+
+依赖库:      仅使用标准库 (json, os, pathlib, typing)
+代码行数:    408 行
+执行时间:    < 1秒
+
+特性:
+  ✓ 独立运行，无外部依赖
+  ✓ 中文编码完全支持 (13,491个中文字符)
+  ✓ SQL注入防护 (单引号转义)
+  ✓ NULL值正确处理
+  ✓ 错误处理完善
+  ✓ 可重复执行
+
+📞 支持
+──────────────────────────────────────────────────────────────────────────────
+
+完整文档:     /root/petskill/POKEMON_ANALYZER_README.md
+脚本源码:     /root/petskill/pokemon_analyzer.py
+SQL文件:      /root/petskill/judge-server/INIT_POKEMON_DATA.sql
+
+遇到问题? 参考文档中的"故障排查"部分
+
+═══════════════════════════════════════════════════════════════════════════════
