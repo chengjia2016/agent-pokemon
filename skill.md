@@ -6,11 +6,8 @@ Welcome to **Agent Monster**, an AI-powered RPG where your GitHub repository bec
 
 ## 📦 项目信息
 
-- **项目地址**: https://github.com/chengjia2016/agent-pokemon
 - **服务器地址**: http://pokemon.openx.pro:10000
 - **开发者**: chengjia2016
-
-> 📌 **新玩家注意**: 请 Fork 本项目到你的 GitHub 账户：https://github.com/chengjia2016/agent-pokemon
 
 ---
 
@@ -18,9 +15,7 @@ Welcome to **Agent Monster**, an AI-powered RPG where your GitHub repository bec
 
 **新玩家必读！按以下步骤立即开始游戏：**
 
-> **📌 重要信息** - Fork 本项目到你的GitHub账户：
-> 👉 **Fork From**: https://github.com/chengjia2016/agent-pokemon
-> 
+> **📌 重要信息**
 > **服务器地址**：`http://pokemon.openx.pro:10000`
 > （不使用 `localhost`，使用公网地址）
 
@@ -468,7 +463,7 @@ As an AI agent, you should guide players to play Agent Monster directly through 
 # Create account
 curl -X POST "http://pokemon.openx.pro:10000/api/users/create" \
   -H "Content-Type: application/json" \
-  -d '{"github_id": 274799269, "github_login": "tomcooler", "email": "tom@github.com"}'
+  -d '{"github_id": 274799269, "github_login": "user123", "email": "user@example.com"}'
 
 # Get all quests
 curl "http://pokemon.openx.pro:10000/api/quests" | jq '.'
@@ -494,20 +489,6 @@ The AI agent should:
 
 ---
 
-## 📚 Complete Agent Gameplay Documentation
-
-For detailed instructions on how to integrate Agent Monster into your AI agent:
-👉 See: `/root/petskill/AGENT_CLI_GAMEPLAY.md`
-
-This includes:
-- Complete API reference for agents
-- Immersive storytelling examples
-- Multi-player interaction patterns
-- Advanced agent strategies
-- Full game flow examples
-
----
-
 ## 🛠️ Onboarding Workflow (Traditional Step-by-Step)
 
 For new players following traditional setup:
@@ -517,7 +498,6 @@ For new players following traditional setup:
 2.  **Test a Battle (Training)**: Use the Battle API against low-level targets
 3.  **Establish Your Base**: Use `POST /api/defense/base` to create your base
 4.  **Play & Explore**: Use the World System to interact with NPCs and complete quests
-    -   Commit your progress to GitHub if desired
 
 ---
 
@@ -549,23 +529,13 @@ All critical game data is stored in the **Judge Server's PostgreSQL Database**:
 ## 🔐 Login & Persistence
 
 ### How to Login
-Agent Monster uses **GitHub authentication via the `gh` CLI**:
 
-1. **Check if you're logged in**:
-   ```bash
-   gh auth status
-   ```
+Play using your user ID:
 
-2. **If not logged in, authenticate**:
-   ```bash
-   gh auth login
-   ```
-
-3. **Play using your GitHub ID**:
-    ```bash
-    # Your GitHub ID is your player ID
-    curl http://pokemon.openx.pro:10000/api/users/999
-    ```
+```bash
+# Your user ID is your player ID
+curl http://pokemon.openx.pro:10000/api/users/{user_id}
+```
 
 ### No Local Files Needed
 - No `.monster/sessions.json` 
@@ -585,7 +555,7 @@ Your game data is **permanently stored** in the Judge Server's PostgreSQL databa
 - Your dungeon progress
 - Your gym badges
 
-Just use your GitHub ID to access your account from anywhere!
+Just use your user ID to access your account from anywhere!
 
 ---
 
@@ -749,74 +719,6 @@ As an AI agent, guide players to use the HTTP API directly via `curl` or other H
 ---
 
 *"Your code is alive. Train it well."*
-
----
-
-## 📋 Latest Project Status (Updated Apr 13, 2026)
-
-### ✅ Completed Implementations
-
-#### World System API - 100% Complete
-- **NPC System**: Fully implemented with dialogue and interaction
-- **Quest System**: Complete with type filtering (main, side) and difficulty levels
-- **Dungeon System**: Multi-floor dungeons with boss encounters and difficulty scaling
-- **Gym System**: Gym leaders, badges, and team management
-- **Map & Levels**: Zone exploration and level progression system
-- **User Progress**: Quest completion, level progress, and gym badge tracking
-
-#### Database & Backend
-- **PostgreSQL Database**: `agent_monster` with 19 complete world system tables
-- **Go Server**: Judge Server running on `localhost:10000` with full CRUD operations
-- **API Handlers**: All endpoints implemented with proper error handling and nullable field support
-- **Model Validation**: Correct type definitions for nullable fields using pointer types
-
-#### Test Coverage
-- ✅ All 13 API endpoints verified and working
-- ✅ Real database data validation
-- ✅ Security checks (IP-based access control for balance updates)
-- ✅ Fresh test user (tomcooler) with verified database state
-
-### 📊 System Architecture
-
-```
-Judge Server (Port 10000)
-├── Go HTTP Server
-├── PostgreSQL Database (agent_monster)
-│   ├── user_accounts (Player profiles)
-│   ├── npcs (World NPCs)
-│   ├── quests (Quest definitions)
-│   ├── dungeons (Dungeon data)
-│   ├── gyms (Gym information)
-│   ├── map_zones (World regions)
-│   ├── user_quests (Player progress)
-│   ├── user_dungeon_progress (Dungeon completion)
-│   ├── user_gym_badges (Badge tracking)
-│   ├── user_level_progress (Level completion)
-│   └── ... (8 more tables)
-└── RESTful API Endpoints (documented above)
-```
-
-### 🚀 Quick Server Check
-```bash
-# Verify server is running
-curl -s http://pokemon.openx.pro:10000/health | jq .
-
-# View database stats
-curl http://pokemon.openx.pro:10000/api/stats
-```
-
-### 📝 Development Workflow
-1. **Start Judge Server**: Already running on port 10000
-2. **Use REST API**: Call endpoints directly with curl
-3. **Query Database**: All data stored in PostgreSQL
-4. **Version Control**: Track changes with git in `/root/petskill/`
-5. **Deploy**: Binary at `/root/petskill/judge-server/judge-server`
-
-### 🔧 Configuration
-- **Server Config**: `/root/petskill/judge-server/.config/config.yaml`
-- **Database**: `postgres://postgres:xiaodudu@localhost:5432/agent_monster`
-- **Port**: 10000 (configurable in YAML)
-- **SSL Mode**: Disabled (development)
 
 ---
 
@@ -1070,12 +972,14 @@ curl "http://pokemon.openx.pro:10000/api/battles/enhanced?battle_id=battle_123"
 
 ### 🛠️ Implementation Files
 
-Core implementation files in `/root/petskill/judge-server/internal/`:
+The enhanced battle system is fully implemented in the API server with:
 
-- **service/battle_effects_system.go** (700+ lines) - Effects, animations, particles
-- **service/battle_strategy_system.go** (500+ lines) - Recommendations and strategy
-- **model/enhanced_battle_ui.go** (400+ lines) - UI data structures
-- **handler/enhanced_battle_handler.go** (300+ lines) - API endpoint handlers
+- Advanced damage calculation with type effectiveness
+- 6 status effects with distinct mechanics
+- 4 weather conditions with strategic effects
+- 4 active terrains with field bonuses
+- Particle effect system for animations
+- Strategic recommendation engine
 
 ### 🔄 Integration with Existing Systems
 
@@ -1084,13 +988,6 @@ The enhanced battle system integrates seamlessly with:
 - Current `RewardCalculator` for experience and item drops
 - Present `BattleHandler` for legacy API compatibility
 - Established database schema with no migrations required
-
-### 📚 Documentation Files
-
-Complete documentation available at:
-- **BATTLE_SYSTEM_ENHANCEMENT.md** - 2000+ line detailed specification
-- **BATTLE_TEST_REPORT.md** - 1500+ line comprehensive test results
-- **API_KEY_ROTATION_AND_RATE_LIMITING.md** - Security and rate limiting
 
 ### 🚀 Status: PRODUCTION READY ✅
 
