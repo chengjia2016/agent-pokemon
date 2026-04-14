@@ -4,14 +4,16 @@ import "time"
 
 // UserAccount represents a user account in the system
 type UserAccount struct {
-	ID          int       `json:"id"`
-	GithubID    int       `json:"github_id"`
-	GithubLogin string    `json:"github_login"`
-	Email       string    `json:"email"`
-	AvatarURL   string    `json:"avatar_url"`
-	Balance     float64   `json:"balance"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID              int        `json:"id"`
+	GithubID        int        `json:"github_id"`
+	GithubLogin     string     `json:"github_login"`
+	Email           string     `json:"email"`
+	AvatarURL       string     `json:"avatar_url"`
+	Balance         float64    `json:"balance"`
+	APIKey          string     `json:"api_key,omitempty"`
+	APIKeyExpiresAt *time.Time `json:"api_key_expires_at,omitempty"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
 }
 
 // UserPokemon represents a pokemon owned by a user
@@ -45,4 +47,14 @@ type Transaction struct {
 	BalanceBefore float64   `json:"balance_before"`
 	BalanceAfter  float64   `json:"balance_after"`
 	CreatedAt     time.Time `json:"created_at"`
+}
+
+// APIKeyHistory represents API key rotation history
+type APIKeyHistory struct {
+	ID        int       `json:"id"`
+	GithubID  int       `json:"github_id"`
+	OldAPIKey *string   `json:"old_api_key,omitempty"`
+	NewAPIKey string    `json:"new_api_key"`
+	Reason    string    `json:"reason"`
+	RotatedAt time.Time `json:"rotated_at"`
 }

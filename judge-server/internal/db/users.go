@@ -3,7 +3,9 @@ package db
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"judge-server/internal/model"
+	"time"
 )
 
 // User Account Operations
@@ -22,13 +24,13 @@ func (d *Database) CreateUserAccount(account *model.UserAccount) error {
 
 func (d *Database) GetUserAccount(githubID int) (*model.UserAccount, error) {
 	query := `
-		SELECT id, github_id, github_login, email, avatar_url, balance, created_at, updated_at
+		SELECT id, github_id, github_login, email, avatar_url, balance, COALESCE(api_key, ''), created_at, updated_at
 		FROM user_accounts WHERE github_id = $1
 	`
 	account := &model.UserAccount{}
 	err := d.conn.QueryRow(query, githubID).Scan(
 		&account.ID, &account.GithubID, &account.GithubLogin, &account.Email,
-		&account.AvatarURL, &account.Balance, &account.CreatedAt, &account.UpdatedAt)
+		&account.AvatarURL, &account.Balance, &account.APIKey, &account.CreatedAt, &account.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, errors.New("user not found")
 	}
@@ -285,4 +287,115 @@ func (d *Database) UpdateSchema() error {
 		}
 	}
 	return nil
+}
+
+// SetUserAPIKey updates the API key for a user
+func (d *Database) SetUserAPIKey(githubID int, apiKey string) error {
+	query := `UPDATE user_accounts SET api_key = $1, api_key_expires_at = $2, updated_at = NOW() WHERE github_id = $3`
+	expiresAt := time.Now().AddDate(0, 0, 90) // 90 days expiration
+	_, err := d.conn.Exec(query, apiKey, expiresAt, githubID)
+	return err
+}
+
+// GetUserByAPIKey retrieves a user account by API key
+func (d *Database) GetUserByAPIKey(apiKey string) (*model.UserAccount, error) {
+	query := `
+		SELECT id, github_id, github_login, email, avatar_url, balance, api_key, api_key_expires_at, created_at, updated_at
+		FROM user_accounts WHERE api_key = $1
+	`
+	account := &model.UserAccount{}
+	err := d.conn.QueryRow(query, apiKey).Scan(
+		&account.ID, &account.GithubID, &account.GithubLogin, &account.Email,
+		&account.AvatarURL, &account.Balance, &account.APIKey, &account.APIKeyExpiresAt, &account.CreatedAt, &account.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, errors.New("invalid api key")
+	}
+	return account, err
+}
+
+// RotateAPIKey rotates the user's API key and records the history
+func (d *Database) RotateAPIKey(githubID int, newAPIKey string, expiresAt time.Time, reason string) (*model.APIKeyHistory, error) {
+	tx, err := d.conn.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Get old API key
+	var oldAPIKey sql.NullString
+	err = tx.QueryRow("SELECT api_key FROM user_accounts WHERE github_id = $1", githubID).Scan(&oldAPIKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get old api key: %w", err)
+	}
+
+	// Update API key
+	_, err = tx.Exec(`
+		UPDATE user_accounts 
+		SET api_key = $1, api_key_expires_at = $2, updated_at = NOW() 
+		WHERE github_id = $3
+	`, newAPIKey, expiresAt, githubID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update api key: %w", err)
+	}
+
+	// Record history
+	history := &model.APIKeyHistory{
+		GithubID:  githubID,
+		NewAPIKey: newAPIKey,
+		Reason:    reason,
+		RotatedAt: time.Now(),
+	}
+
+	if oldAPIKey.Valid {
+		history.OldAPIKey = &oldAPIKey.String
+	}
+
+	err = tx.QueryRow(`
+		INSERT INTO api_key_history (github_id, old_api_key, new_api_key, reason)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, rotated_at
+	`, githubID, oldAPIKey, newAPIKey, reason).Scan(&history.ID, &history.RotatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to record history: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return history, nil
+}
+
+// GetAPIKeyHistory retrieves the API key rotation history for a user
+func (d *Database) GetAPIKeyHistory(githubID int, limit int) ([]*model.APIKeyHistory, error) {
+	if limit <= 0 {
+		limit = 10
+	}
+
+	query := `
+		SELECT id, github_id, old_api_key, new_api_key, reason, rotated_at
+		FROM api_key_history
+		WHERE github_id = $1
+		ORDER BY rotated_at DESC
+		LIMIT $2
+	`
+
+	rows, err := d.conn.Query(query, githubID, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query api key history: %w", err)
+	}
+	defer rows.Close()
+
+	var history []*model.APIKeyHistory
+	for rows.Next() {
+		h := &model.APIKeyHistory{}
+		err := rows.Scan(&h.ID, &h.GithubID, &h.OldAPIKey, &h.NewAPIKey, &h.Reason, &h.RotatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan history: %w", err)
+		}
+		history = append(history, h)
+	}
+
+	return history, nil
 }

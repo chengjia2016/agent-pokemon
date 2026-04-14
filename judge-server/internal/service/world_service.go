@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"judge-server/internal/db"
 	"judge-server/internal/model"
+	"math/rand"
+	"time"
 )
 
 // WorldService 世界系统服务
@@ -562,6 +564,22 @@ func (s *WorldService) CompleteQuest(userID int, questID int) (*model.UserQuest,
 		return nil, fmt.Errorf("failed to complete quest: %w", err)
 	}
 
+	// 分配奖励
+	quest, err := s.GetQuest(questID)
+	if err != nil {
+		// 即使获取任务失败，也不影响任务完成的返回，只是没有奖励
+		fmt.Printf("Warning: Failed to get quest %d for rewards: %v\n", questID, err)
+		return result, nil
+	}
+
+	// 给用户添加金币奖励
+	if quest.RewardCoins != nil && *quest.RewardCoins > 0 {
+		description := fmt.Sprintf("Quest %d completion reward", questID)
+		if err := s.database.UpdateUserBalance(userID, float64(*quest.RewardCoins), description); err != nil {
+			fmt.Printf("Warning: Failed to add coins reward to user %d: %v\n", userID, err)
+		}
+	}
+
 	return result, nil
 }
 
@@ -1034,4 +1052,118 @@ func (s *WorldService) GetUserLevelProgress(userID int) ([]*model.UserLevelProgr
 	}
 
 	return progresses, nil
+}
+
+// GetWildPokemonByZoneCode 获取某个地区的野生 Pokemon
+func (s *WorldService) GetWildPokemonByZoneCode(zoneCode string) ([]*model.WildPokemon, error) {
+	// 首先获取zone的location_id
+	// 根据zone_code找到对应的zone，然后使用zone_code作为location_id
+	wildPokemons, err := s.database.GetWildPokemonByLocation(zoneCode)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get wild pokemon: %w", err)
+	}
+
+	return wildPokemons, nil
+}
+
+// CaptureWildPokemonAPI 通过API捕获野生 Pokemon（包含成功率判断）
+func (s *WorldService) CaptureWildPokemonAPI(githubID int, wildPokemonID string, ballType string) (bool, *model.UserOwnedPokemon, error) {
+	// 获取野生 Pokemon
+	wildPokemon, err := s.database.GetWildPokemon(wildPokemonID)
+	if err != nil {
+		return false, nil, fmt.Errorf("wild pokemon not found: %w", err)
+	}
+
+	// 检查状态是否为 active
+	if wildPokemon.Status != "active" {
+		return false, nil, fmt.Errorf("wild pokemon is not available (status: %s)", wildPokemon.Status)
+	}
+
+	// 计算捕捉成功率（简化版本）
+	// 基于: 野生 Pokemon 的 capture_difficulty, 当前HP百分比, 使用的精灵球类型
+	hpPercent := (wildPokemon.CurrentHP * 100) / wildPokemon.MaxHP
+
+	// 基础成功率
+	baseSuccessRate := wildPokemon.CaptureDifficulty
+
+	// 根据 HP 百分比调整（HP越低越容易捕捉）
+	if hpPercent > 50 {
+		baseSuccessRate = baseSuccessRate * 30 / 100
+	} else if hpPercent > 30 {
+		baseSuccessRate = baseSuccessRate * 60 / 100
+	} else if hpPercent > 10 {
+		baseSuccessRate = baseSuccessRate * 100 / 100
+	} else {
+		baseSuccessRate = baseSuccessRate * 150 / 100
+	}
+
+	// 根据精灵球类型调整
+	ballMultiplier := 1.0
+	isMasterBall := false
+	switch ballType {
+	case "poke_ball":
+		ballMultiplier = 1.0
+	case "great_ball":
+		ballMultiplier = 1.5
+	case "ultra_ball":
+		ballMultiplier = 2.0
+	case "master_ball":
+		ballMultiplier = 100.0
+		isMasterBall = true
+	default:
+		ballMultiplier = 1.0
+	}
+
+	// 计算最终成功率
+	var success bool
+	if isMasterBall {
+		// Master Ball always succeeds
+		success = true
+	} else {
+		// 计算最终成功率 (限制在 5-95 之间)
+		finalSuccessRate := int(float64(baseSuccessRate) * ballMultiplier)
+		if finalSuccessRate > 95 {
+			finalSuccessRate = 95
+		}
+		if finalSuccessRate < 5 {
+			finalSuccessRate = 5
+		}
+
+		// 生成随机数判断是否捕捉成功
+		randomValue := rand.Intn(100)
+		success = randomValue < finalSuccessRate
+	}
+
+	// 如果捕捉成功，创建新的用户 Pokemon
+	var userPokemon *model.UserOwnedPokemon
+	if success {
+		// 生成新的 pet_id
+		petID := fmt.Sprintf("pet_%d_%d", githubID, time.Now().UnixNano())
+
+		// 获取 Pokemon 物种信息以获取名字
+		// 这里我们假设 wildPokemon.PokemonSpeciesID 就是 pokemon_id
+		// 我们需要查询 pokemon_species 表来获取名字
+		// 简单起见，我们使用 Pokemon 物种 ID 作为名字
+		pokemonName := fmt.Sprintf("Pokemon_%s", wildPokemon.PokemonSpeciesID)
+
+		// 先在 pets 表中创建 pet
+		err = s.database.CreatePet(petID, pokemonName, fmt.Sprintf("%d", githubID), wildPokemon.PokemonSpeciesID, wildPokemon.Level)
+		if err != nil {
+			return false, nil, fmt.Errorf("failed to create pet: %w", err)
+		}
+
+		// 添加到用户的 Pokemon 列表
+		userPokemon, err = s.database.AddOwnedPokemon(githubID, petID, true, wildPokemon.MaxHP)
+		if err != nil {
+			return false, nil, fmt.Errorf("failed to add pokemon to user: %w", err)
+		}
+
+		// 更新野生 Pokemon 状态
+		err = s.database.CaptureWildPokemon(wildPokemonID, githubID, petID, true)
+		if err != nil {
+			return false, nil, fmt.Errorf("failed to update wild pokemon status: %w", err)
+		}
+	}
+
+	return success, userPokemon, nil
 }

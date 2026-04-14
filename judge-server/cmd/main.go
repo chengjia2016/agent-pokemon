@@ -5,6 +5,7 @@ import (
 	"judge-server/internal/db"
 	"judge-server/internal/github"
 	"judge-server/internal/handler"
+	"judge-server/internal/middleware"
 	"judge-server/internal/service"
 	"log"
 	"net/http"
@@ -39,6 +40,11 @@ type Config struct {
 		SyncToGitHub        bool   `yaml:"sync_to_github"`
 		SyncIntervalSeconds int    `yaml:"sync_interval_seconds"`
 	} `yaml:"settlement"`
+	RateLimit struct {
+		RequestsPerMinute int  `yaml:"requests_per_minute"`
+		BurstSize         int  `yaml:"burst_size"`
+		Enabled           bool `yaml:"enabled"`
+	} `yaml:"rate_limit"`
 }
 
 func main() {
@@ -121,6 +127,9 @@ func main() {
 	http.HandleFunc("/api/capture/validate", h.ValidateCapture)
 
 	// User Account Management endpoints (register longer paths first!)
+	http.HandleFunc("/api/user/api-key/rotate", h.RotateAPIKey)
+	http.HandleFunc("/api/user/api-key/history", h.GetAPIKeyHistory)
+	http.HandleFunc("/api/user/init-config", h.InitUserConfig)
 	http.HandleFunc("/api/user/balance/get", h.GetUserBalance)
 	http.HandleFunc("/api/user/balance/update", h.UpdateUserBalance)
 	http.HandleFunc("/api/user/pokemons/get", h.GetUserPokemons)
@@ -258,18 +267,56 @@ func main() {
 	http.HandleFunc("/api/npcs", h.HandleWorldNPCs)
 	http.HandleFunc("/api/user/quests", h.HandleWorldUserQuests)
 	http.HandleFunc("/api/quests", h.HandleWorldQuests)
+	http.HandleFunc("/api/quests/complete", h.HandleCompleteQuest)
 	http.HandleFunc("/api/dungeons", h.HandleWorldDungeons)
 	http.HandleFunc("/api/gyms", h.HandleWorldGyms)
 	http.HandleFunc("/api/map/zones", h.HandleWorldMapZones)
 	http.HandleFunc("/api/user/levels/progress", h.HandleWorldUserLevelProgress)
 	http.HandleFunc("/api/levels", h.HandleWorldLevels)
 
+	// Enhanced Battle System endpoints
+	enhancedBattleEngine := service.NewEnhancedBattleEngine()
+	effectsSystem := service.NewBattleEffectsSystem()
+	strategySystem := service.NewBattleStrategySystem()
+	battleEngineV2 := service.NewBattleEngineV2(nil, database)
+	enhancedBattleHandler := handler.NewEnhancedBattleHandler(
+		enhancedBattleEngine,
+		effectsSystem,
+		strategySystem,
+		battleEngineV2,
+	)
+	handler.RegisterEnhancedBattleRoutes(http.DefaultServeMux, enhancedBattleHandler)
+
 	addr := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
 	log.Printf("Judge Server starting on %s", addr)
 	log.Printf("Database: %s@%s:%d/%s", config.Database.User, config.Database.Host, config.Database.Port, config.Database.DBName)
 
+	// Initialize rate limiter if enabled
+	var rateLimiter *middleware.RateLimiter
+	if config.RateLimit.Enabled {
+		rateLimitConfig := middleware.RateLimitConfig{
+			RequestsPerMinute: config.RateLimit.RequestsPerMinute,
+			BurstSize:         config.RateLimit.BurstSize,
+		}
+		if rateLimitConfig.RequestsPerMinute <= 0 {
+			rateLimitConfig.RequestsPerMinute = 1000 // default 1000 req/min
+		}
+		if rateLimitConfig.BurstSize <= 0 {
+			rateLimitConfig.BurstSize = 50 // default burst size
+		}
+		rateLimiter = middleware.NewRateLimiter(rateLimitConfig)
+		log.Printf("Rate limiting enabled: %d requests/min, burst size: %d",
+			rateLimitConfig.RequestsPerMinute, rateLimitConfig.BurstSize)
+	}
+
+	// Create HTTP server with optional rate limiting middleware
+	var server http.Handler = http.DefaultServeMux
+	if rateLimiter != nil {
+		server = rateLimiter.Middleware(http.DefaultServeMux)
+	}
+
 	go func() {
-		if err := http.ListenAndServe(addr, nil); err != nil {
+		if err := http.ListenAndServe(addr, server); err != nil {
 			log.Fatalf("Server failed: %v", err)
 		}
 	}()
@@ -279,6 +326,9 @@ func main() {
 	<-sigCh
 
 	log.Println("Shutting down...")
+	if rateLimiter != nil {
+		rateLimiter.Stop()
+	}
 	if batchSync != nil {
 		batchSync.Stop()
 	}

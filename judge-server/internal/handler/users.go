@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"judge-server/internal/auth"
 	"judge-server/internal/model"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // CreateUserAccount creates a new user account
@@ -57,10 +59,30 @@ func (h *Handler) CreateUserAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Generate API key
+	apiKey, err := auth.GenerateAPIKey()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "Failed to generate API key: " + err.Error(),
+		})
+		return
+	}
+
+	// Save API key to database
+	if err := h.db.SetUserAPIKey(req.GithubID, apiKey); err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "Failed to save API key: " + err.Error(),
+		})
+		return
+	}
+
 	writeJSON(w, http.StatusCreated, map[string]interface{}{
 		"success":            true,
 		"message":            "User account created with starter pack bonus",
 		"user":               account,
+		"api_key":            apiKey,
 		"starter_pack_bonus": STARTER_PACK_COINS,
 		"bonus_reason":       "Automatic starter pack reward for new players",
 	})
@@ -361,5 +383,172 @@ func (h *Handler) GetUserTransactions(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"transactions": transactions,
 		"total":        len(transactions),
+	})
+}
+
+// InitUserConfig returns user info and API key for local configuration
+func (h *Handler) InitUserConfig(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"success": false,
+			"error":   "Method not allowed",
+		})
+		return
+	}
+
+	var req struct {
+		GithubID int `json:"github_id"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request body: " + err.Error(),
+		})
+		return
+	}
+
+	if req.GithubID == 0 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "github_id parameter required",
+		})
+		return
+	}
+
+	// Get user account
+	account, err := h.db.GetUserAccount(req.GithubID)
+	if err != nil {
+		writeJSON(w, http.StatusNotFound, map[string]interface{}{
+			"success": false,
+			"error":   "User not found",
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"config": map[string]interface{}{
+			"github_id":    account.GithubID,
+			"github_login": account.GithubLogin,
+			"api_key":      account.APIKey,
+			"email":        account.Email,
+		},
+		"message": "User config ready - save this to ~/.config/petskill/settings.json",
+	})
+}
+
+// RotateAPIKey rotates the user's API key
+func (h *Handler) RotateAPIKey(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"success": false,
+			"error":   "Method not allowed",
+		})
+		return
+	}
+
+	var req struct {
+		GithubID int    `json:"github_id"`
+		Reason   string `json:"reason"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request body: " + err.Error(),
+		})
+		return
+	}
+
+	if req.GithubID == 0 {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "github_id parameter required",
+		})
+		return
+	}
+
+	// Generate new API key
+	newAPIKey, err := auth.GenerateAPIKey()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "Failed to generate new API key: " + err.Error(),
+		})
+		return
+	}
+
+	// Set expiration time to 90 days from now
+	expiresAt := time.Now().AddDate(0, 0, 90)
+
+	// Rotate the API key in database
+	history, err := h.db.RotateAPIKey(req.GithubID, newAPIKey, expiresAt, req.Reason)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "Failed to rotate API key: " + err.Error(),
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success":          true,
+		"message":          "API key rotated successfully",
+		"new_api_key":      newAPIKey,
+		"expires_at":       expiresAt,
+		"rotation_history": history,
+	})
+}
+
+// GetAPIKeyHistory retrieves the API key rotation history
+func (h *Handler) GetAPIKeyHistory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"success": false,
+			"error":   "Method not allowed",
+		})
+		return
+	}
+
+	githubIDStr := r.URL.Query().Get("github_id")
+	if githubIDStr == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "github_id parameter required",
+		})
+		return
+	}
+
+	githubID, err := strconv.Atoi(githubIDStr)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "Invalid github_id",
+		})
+		return
+	}
+
+	limitStr := r.URL.Query().Get("limit")
+	limit := 10
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	history, err := h.db.GetAPIKeyHistory(githubID, limit)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"history": history,
+		"total":   len(history),
 	})
 }

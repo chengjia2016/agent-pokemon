@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"judge-server/internal/model"
 	"judge-server/internal/service"
 	"net/http"
 	"strconv"
@@ -11,6 +10,7 @@ import (
 // PokemonCaptureHandler 宠物捕获处理器
 type PokemonCaptureHandler struct {
 	pokemonManager *service.PokemonManager
+	worldService   *service.WorldService
 }
 
 func NewPokemonCaptureHandler(pm *service.PokemonManager) *PokemonCaptureHandler {
@@ -19,10 +19,17 @@ func NewPokemonCaptureHandler(pm *service.PokemonManager) *PokemonCaptureHandler
 	}
 }
 
+func NewPokemonCaptureHandlerWithWorldService(pm *service.PokemonManager, ws *service.WorldService) *PokemonCaptureHandler {
+	return &PokemonCaptureHandler{
+		pokemonManager: pm,
+		worldService:   ws,
+	}
+}
+
 // ==================== 野生宠物列表 ====================
 
 // ListWildPokemon 列出野生宠物
-// GET /api/wild-pokemon
+// GET /api/wild-pokemon?zone_code=ZONE_001
 func (pch *PokemonCaptureHandler) ListWildPokemon(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
@@ -32,30 +39,39 @@ func (pch *PokemonCaptureHandler) ListWildPokemon(w http.ResponseWriter, r *http
 		return
 	}
 
-	// 解析分页参数
-	limitStr := r.URL.Query().Get("limit")
-	offsetStr := r.URL.Query().Get("offset")
-
-	limit := 20
-	offset := 0
-
-	if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 100 {
-		limit = l
-	}
-	if o, err := strconv.Atoi(offsetStr); err == nil && o >= 0 {
-		offset = o
+	// 获取 zone_code 参数
+	zoneCode := r.URL.Query().Get("zone_code")
+	if zoneCode == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "zone_code parameter required",
+		})
+		return
 	}
 
-	// TODO: 从数据库获取野生宠物列表
-	// 当前返回空列表作为占位符
-	wildPokemons := []interface{}{}
+	// 检查是否有 worldService
+	if pch.worldService == nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "world service not available",
+		})
+		return
+	}
+
+	// 获取该地区的野生 Pokemon
+	wildPokemons, err := pch.worldService.GetWildPokemonByZoneCode(zoneCode)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"data":    wildPokemons,
-		"limit":   limit,
-		"offset":  offset,
-		"total":   0,
+		"total":   len(wildPokemons),
 	})
 }
 
@@ -63,6 +79,7 @@ func (pch *PokemonCaptureHandler) ListWildPokemon(w http.ResponseWriter, r *http
 
 // CapturePokemon 捕获野生宠物
 // POST /api/wild-pokemon/capture
+// 请求体: {"github_id": 274799269, "wild_pokemon_id": "wild_zone001_001", "ball_type": "poke_ball"}
 func (pch *PokemonCaptureHandler) CapturePokemon(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
@@ -72,7 +89,7 @@ func (pch *PokemonCaptureHandler) CapturePokemon(w http.ResponseWriter, r *http.
 		return
 	}
 
-	var req model.CapturePokemonRequest
+	var req map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
@@ -81,36 +98,70 @@ func (pch *PokemonCaptureHandler) CapturePokemon(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// TODO: 从认证token获取用户ID
-	githubID := 1
+	// 获取用户 ID - 支持 github_id 或 API key 验证
+	var githubID int
+	var wildPokemonID string
+	var ballType = "poke_ball"
 
-	// 检查是否可以添加宠物（限制10只）
-	canAdd, err := pch.pokemonManager.CanAddPokemon(githubID)
-	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
-			"success": false,
-			"error":   "Failed to check pokemon limit",
-		})
-		return
-	}
-
-	if !canAdd {
+	// 首先尝试从 github_id 参数获取（向后兼容）
+	if gid, ok := req["github_id"].(float64); ok {
+		githubID = int(gid)
+	} else {
+		// 如果没有 github_id，必须返回错误
 		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
 			"success": false,
-			"error":   "Pokemon limit reached (max 10)",
+			"error":   "github_id parameter required",
 		})
 		return
 	}
 
-	// TODO: 实现捕获逻辑
-	// 1. 获取野生宠物
-	// 2. 更新捕获记录
-	// 3. 将宠物添加到用户账户
+	if wpid, ok := req["wild_pokemon_id"].(string); ok {
+		wildPokemonID = wpid
+	} else {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "wild_pokemon_id parameter required",
+		})
+		return
+	}
 
-	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"success": true,
-		"message": "Pokemon captured successfully",
-	})
+	if bt, ok := req["ball_type"].(string); ok && bt != "" {
+		ballType = bt
+	}
+
+	// 检查是否有 worldService
+	if pch.worldService == nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   "world service not available",
+		})
+		return
+	}
+
+	// 尝试捕捉 Pokemon
+	success, userPokemon, err := pch.worldService.CaptureWildPokemonAPI(githubID, wildPokemonID, ballType)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if success {
+		writeJSON(w, http.StatusOK, map[string]interface{}{
+			"success":          true,
+			"captured":         true,
+			"message":          "Pokemon captured successfully!",
+			"captured_pokemon": userPokemon,
+		})
+	} else {
+		writeJSON(w, http.StatusOK, map[string]interface{}{
+			"success":  true,
+			"captured": false,
+			"message":  "Pokemon escaped from the Pokéball!",
+		})
+	}
 }
 
 // ==================== 捕获尝试历史 ====================

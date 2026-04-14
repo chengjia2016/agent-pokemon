@@ -376,3 +376,49 @@ func (d *Database) GetStrongestPokemon(githubID int, limit int) ([]model.UserOwn
 
 	return pokemons, nil
 }
+
+// GetWildPokemonByLocation 获取某个地区的所有活跃野生精灵
+func (d *Database) GetWildPokemonByLocation(locationID string) ([]*model.WildPokemon, error) {
+	query := `SELECT id, wild_id, location_id, pokemon_species_id, level, status, current_hp, max_hp, capture_difficulty, 
+	                 caught_by_github_id, defeated_by_github_id, created_at, captured_at, defeated_at, updated_at
+	          FROM wild_pokemon 
+	          WHERE location_id = $1 AND status = 'active'
+	          ORDER BY level, id`
+
+	rows, err := d.conn.Query(query, locationID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query wild pokemon: %w", err)
+	}
+	defer rows.Close()
+
+	var wildPokemons []*model.WildPokemon
+	for rows.Next() {
+		wild := &model.WildPokemon{}
+		err := rows.Scan(&wild.ID, &wild.WildID, &wild.LocationID, &wild.PokemonSpeciesID, &wild.Level,
+			&wild.Status, &wild.CurrentHP, &wild.MaxHP, &wild.CaptureDifficulty, &wild.CaughtByGitHubID, &wild.DefeatedByGitHubID,
+			&wild.CreatedAt, &wild.CapturedAt, &wild.DefeatedAt, &wild.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan wild pokemon: %w", err)
+		}
+		wildPokemons = append(wildPokemons, wild)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating wild pokemon rows: %w", err)
+	}
+
+	return wildPokemons, nil
+}
+
+// CreatePet 创建一个新的 pet 记录
+func (d *Database) CreatePet(petID, name, owner, species string, level int) error {
+	query := `INSERT INTO pets (id, name, owner, species, generation, evolution_stage, level, exp, is_valid, updated_at)
+	          VALUES ($1, $2, $3, $4, 1, 1, $5, 0, true, NOW())`
+
+	_, err := d.conn.Exec(query, petID, name, owner, species, level)
+	if err != nil {
+		return fmt.Errorf("failed to create pet: %w", err)
+	}
+
+	return nil
+}

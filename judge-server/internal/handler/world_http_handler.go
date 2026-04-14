@@ -381,3 +381,102 @@ func (h *WorldHTTPHandler) HandleUserLevelProgress(w http.ResponseWriter, r *htt
 		"total":    len(progress),
 	})
 }
+
+// ==================== Wild Pokemon Endpoints ====================
+
+// HandleWildPokemon handles GET /api/wild-pokemon
+func (h *WorldHTTPHandler) HandleWildPokemon(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"success": false,
+			"error":   "Method not allowed",
+		})
+		return
+	}
+
+	// 需要 zone_code 参数来标识地区
+	zoneCode := r.URL.Query().Get("zone_code")
+	if zoneCode == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "zone_code parameter required",
+		})
+		return
+	}
+
+	// 获取该地区的野生 Pokemon
+	wildPokemons, err := h.worldService.GetWildPokemonByZoneCode(zoneCode)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"data":    wildPokemons,
+		"total":   len(wildPokemons),
+	})
+}
+
+// HandleCompleteQuest handles POST /api/quests/complete
+func (h *WorldHTTPHandler) HandleCompleteQuest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeJSON(w, http.StatusMethodNotAllowed, map[string]interface{}{
+			"success": false,
+			"error":   "Method not allowed",
+		})
+		return
+	}
+
+	var req map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "Invalid request body",
+		})
+		return
+	}
+
+	// 获取用户 ID 和任务 ID
+	var userID int
+	var questID int
+
+	if uid, ok := req["user_id"].(float64); ok {
+		userID = int(uid)
+	} else {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "user_id parameter required",
+		})
+		return
+	}
+
+	if qid, ok := req["quest_id"].(float64); ok {
+		questID = int(qid)
+	} else {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   "quest_id parameter required",
+		})
+		return
+	}
+
+	// 完成任务
+	userQuest, err := h.worldService.CompleteQuest(userID, questID)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Quest completed successfully!",
+		"quest":   userQuest,
+	})
+}

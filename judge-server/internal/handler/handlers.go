@@ -257,6 +257,37 @@ func writeJSON(w http.ResponseWriter, status int, data interface{}) {
 	json.NewEncoder(w).Encode(data)
 }
 
+// validateAPIKey checks the API key from request headers and returns the github ID
+// Returns (githubID, error)
+func (h *Handler) validateAPIKey(r *http.Request) (int, error) {
+	// Get API key from header
+	apiKey := r.Header.Get("X-API-Key")
+	if apiKey == "" {
+		// Try from Authorization header with Bearer token
+		auth := r.Header.Get("Authorization")
+		if auth != "" && len(auth) > 7 && auth[:7] == "Bearer " {
+			apiKey = auth[7:]
+		}
+	}
+
+	if apiKey == "" {
+		return 0, fmt.Errorf("missing api key")
+	}
+
+	// Verify API key in database
+	user, err := h.db.GetUserByAPIKey(apiKey)
+	if err != nil {
+		return 0, fmt.Errorf("invalid api key")
+	}
+
+	// Check if API key has expired
+	if user.APIKeyExpiresAt != nil && time.Now().After(*user.APIKeyExpiresAt) {
+		return 0, fmt.Errorf("api key has expired")
+	}
+
+	return user.GithubID, nil
+}
+
 // ==================== Battle System Delegation Methods ====================
 
 // Battle endpoints
@@ -318,12 +349,12 @@ func (h *Handler) GetDefenseStats(w http.ResponseWriter, r *http.Request) {
 
 // Pokemon Capture endpoints
 func (h *Handler) ListWildPokemon(w http.ResponseWriter, r *http.Request) {
-	pch := NewPokemonCaptureHandler(h.pokemonManager)
+	pch := NewPokemonCaptureHandlerWithWorldService(h.pokemonManager, h.worldService)
 	pch.ListWildPokemon(w, r)
 }
 
 func (h *Handler) CapturePokemon(w http.ResponseWriter, r *http.Request) {
-	pch := NewPokemonCaptureHandler(h.pokemonManager)
+	pch := NewPokemonCaptureHandlerWithWorldService(h.pokemonManager, h.worldService)
 	pch.CapturePokemon(w, r)
 }
 
@@ -403,4 +434,9 @@ func (h *Handler) HandleWorldLevels(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) HandleWorldUserLevelProgress(w http.ResponseWriter, r *http.Request) {
 	wh := NewWorldHTTPHandler(h.worldService)
 	wh.HandleUserLevelProgress(w, r)
+}
+
+func (h *Handler) HandleCompleteQuest(w http.ResponseWriter, r *http.Request) {
+	wh := NewWorldHTTPHandler(h.worldService)
+	wh.HandleCompleteQuest(w, r)
 }
