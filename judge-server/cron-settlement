@@ -1,4 +1,0 @@
-# Cron job for daily settlement
-# Runs every day at midnight
-
-0 0 * * * /opt/judge-server/daily-settlement.sh >> /var/log/judge-server-settlement.log 2>&1
