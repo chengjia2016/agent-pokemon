@@ -8,7 +8,7 @@ Welcome to **Agent Monster**, an AI-powered RPG where your GitHub repository bec
 
 - **原始项目**: https://github.com/anomalyco/petskill
 - **Fork 项目**: https://github.com/chengjia2016/agent-pokemon
-- **服务器地址**: http://agent-pokemon.anomalyco.com:10000
+- **服务器地址**: http://pokemon.openx.pro:10000
 - **开发者**: chengjia2016
 
 > 📌 **新玩家注意**: 请 Fork 本项目到你的 GitHub 账户：https://github.com/chengjia2016/agent-pokemon
@@ -22,12 +22,12 @@ Welcome to **Agent Monster**, an AI-powered RPG where your GitHub repository bec
 > **📌 重要信息** - Fork 本项目到你的GitHub账户：
 > 👉 **Fork From**: https://github.com/chengjia2016/agent-pokemon
 > 
-> **服务器地址**：`http://agent-pokemon.anomalyco.com:10000`
+> **服务器地址**：`http://pokemon.openx.pro:10000`
 > （不使用 `localhost`，使用公网地址）
 
 ### 1️⃣ 检查游戏服务器是否运行
 ```bash
-curl -s http://agent-pokemon.anomalyco.com:10000/health
+curl -s http://pokemon.openx.pro:10000/health
 ```
 *应该看到*:
 ```json
@@ -37,18 +37,18 @@ curl -s http://agent-pokemon.anomalyco.com:10000/health
 ### 2️⃣ 查看你是谁（获取用户ID）
 ```bash
 # 用你的GitHub用户ID替换 'your_github_id'
-curl http://agent-pokemon.anomalyco.com:10000/api/users/your_github_id
+curl http://pokemon.openx.pro:10000/api/users/your_github_id
 ```
 
 ### 3️⃣ 探索游戏世界
 ```bash
 # 查看所有岛屿和城镇
-curl http://agent-pokemon.anomalyco.com:10000/api/maps | jq .
+curl http://pokemon.openx.pro:10000/api/maps | jq .
 ```
 
 ### 4️⃣ 创建你的基地
 ```bash
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/defense/base" \
+curl -X POST "http://pokemon.openx.pro:10000/api/defense/base" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_github_id",
@@ -72,33 +72,33 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/defense/base" \
 #### 1. 🤖 与NPC交互
 ```bash
 # 获取城镇中所有NPC
-curl "http://agent-pokemon.anomalyco.com:10000/api/npcs?town_id=1"
+curl "http://pokemon.openx.pro:10000/api/npcs?town_id=1"
 
 # 与NPC对话
-curl "http://agent-pokemon.anomalyco.com:10000/api/npcs/talk?npc_id=1"
+curl "http://pokemon.openx.pro:10000/api/npcs/talk?npc_id=1"
 ```
 
 #### 2. 📜 接受和完成任务
 ```bash
 # 查看可用任务
-curl "http://agent-pokemon.anomalyco.com:10000/api/quests"
+curl "http://pokemon.openx.pro:10000/api/quests"
 
 # 接受任务
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/quests?user_id=your_id&quest_id=1&action=accept" \
+curl -X POST "http://pokemon.openx.pro:10000/api/user/quests?user_id=your_id&quest_id=1&action=accept" \
   -H "Content-Type: application/json"
 
 # 完成任务
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/quests?user_id=your_id&quest_id=1&action=complete" \
+curl -X POST "http://pokemon.openx.pro:10000/api/user/quests?user_id=your_id&quest_id=1&action=complete" \
   -H "Content-Type: application/json"
 
 # 查看你的任务进度
-curl "http://agent-pokemon.anomalyco.com:10000/api/user/quests?user_id=your_id"
+curl "http://pokemon.openx.pro:10000/api/user/quests?user_id=your_id"
 ```
 
 #### 3. 🏰 地下城副本
 ```bash
 # 进入地下城
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/dungeons" \
+curl -X POST "http://pokemon.openx.pro:10000/api/dungeons" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_id",
@@ -106,19 +106,19 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/dungeons" \
   }'
 
 # 查看你的地下城进度
-curl "http://agent-pokemon.anomalyco.com:10000/api/user/dungeons?user_id=your_id"
+curl "http://pokemon.openx.pro:10000/api/user/dungeons?user_id=your_id"
 ```
 
 #### 4. 🏆 体操馆挑战
 ```bash
 # 查看所有体操馆
-curl "http://agent-pokemon.anomalyco.com:10000/api/gyms"
+curl "http://pokemon.openx.pro:10000/api/gyms"
 
 # 查看你赢得的徽章
-curl "http://agent-pokemon.anomalyco.com:10000/api/gyms?user_id=your_id"
+curl "http://pokemon.openx.pro:10000/api/gyms?user_id=your_id"
 
 # 获得体操馆徽章
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/gyms" \
+curl -X POST "http://pokemon.openx.pro:10000/api/gyms" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_id",
@@ -130,13 +130,13 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/gyms" \
 #### 5. 🗺️ 探索地图关卡
 ```bash
 # 查看地图区域
-curl "http://agent-pokemon.anomalyco.com:10000/api/map/zones"
+curl "http://pokemon.openx.pro:10000/api/map/zones"
 
 # 获取某个区域的关卡
-curl "http://agent-pokemon.anomalyco.com:10000/api/levels?zone_id=1"
+curl "http://pokemon.openx.pro:10000/api/levels?zone_id=1"
 
 # 完成一个关卡
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/levels/progress" \
+curl -X POST "http://pokemon.openx.pro:10000/api/user/levels/progress" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_id",
@@ -145,7 +145,7 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/levels/progress"
   }'
 
 # 查看你的关卡进度
-curl "http://agent-pokemon.anomalyco.com:10000/api/user/levels?user_id=your_id"
+curl "http://pokemon.openx.pro:10000/api/user/levels?user_id=your_id"
 ```
 
 ---
@@ -182,7 +182,7 @@ curl "http://agent-pokemon.anomalyco.com:10000/api/user/levels?user_id=your_id"
 #### 示例：创建和交互NPC
 ```bash
 # 创建新NPC
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/npcs" \
+curl -X POST "http://pokemon.openx.pro:10000/api/npcs" \
   -H "Content-Type: application/json" \
   -d '{
     "town_id": "1",
@@ -196,10 +196,10 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/npcs" \
   }'
 
 # 获取城镇的所有NPCs
-curl "http://agent-pokemon.anomalyco.com:10000/api/npcs?town_id=1" | jq '.'
+curl "http://pokemon.openx.pro:10000/api/npcs?town_id=1" | jq '.'
 
 # 与NPC交话
-curl "http://agent-pokemon.anomalyco.com:10000/api/npcs/talk?npc_id=1" | jq '.'
+curl "http://pokemon.openx.pro:10000/api/npcs/talk?npc_id=1" | jq '.'
 ```
 
 ---
@@ -234,10 +234,10 @@ curl "http://agent-pokemon.anomalyco.com:10000/api/npcs/talk?npc_id=1" | jq '.'
 #### 示例：完整任务流程
 ```bash
 # 第1步：查看所有任务
-curl "http://agent-pokemon.anomalyco.com:10000/api/quests" | jq '.quests[] | {id, title_en, description_en, reward_gold}'
+curl "http://pokemon.openx.pro:10000/api/quests" | jq '.quests[] | {id, title_en, description_en, reward_gold}'
 
 # 第2步：接受任务
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/quests" \
+curl -X POST "http://pokemon.openx.pro:10000/api/user/quests" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_id",
@@ -246,10 +246,10 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/quests" \
   }'
 
 # 第3步：查看我的任务进度
-curl "http://agent-pokemon.anomalyco.com:10000/api/user/quests?user_id=your_id" | jq '.quests[] | {quest_id, status, progress}'
+curl "http://pokemon.openx.pro:10000/api/user/quests?user_id=your_id" | jq '.quests[] | {quest_id, status, progress}'
 
 # 第4步：完成任务
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/quests" \
+curl -X POST "http://pokemon.openx.pro:10000/api/user/quests" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_id",
@@ -258,7 +258,7 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/quests" \
   }'
 
 # 第5步：查看你的进度和奖励
-curl "http://agent-pokemon.anomalyco.com:10000/api/users/your_id" | jq '.gold, .exp'
+curl "http://pokemon.openx.pro:10000/api/users/your_id" | jq '.gold, .exp'
 ```
 
 ---
@@ -286,10 +286,10 @@ curl "http://agent-pokemon.anomalyco.com:10000/api/users/your_id" | jq '.gold, .
 #### 示例：地下城冒险
 ```bash
 # 查看可用地下城
-curl "http://agent-pokemon.anomalyco.com:10000/api/dungeons" | jq '.dungeons[] | {id, name_en, difficulty_level, boss_name_en}'
+curl "http://pokemon.openx.pro:10000/api/dungeons" | jq '.dungeons[] | {id, name_en, difficulty_level, boss_name_en}'
 
 # 进入地下城
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/dungeons" \
+curl -X POST "http://pokemon.openx.pro:10000/api/dungeons" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_id",
@@ -297,7 +297,7 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/dungeons" \
   }'
 
 # 查看地下城进度
-curl "http://agent-pokemon.anomalyco.com:10000/api/user/dungeons?user_id=your_id" | jq '.progress[] | {dungeon_id, current_floor, status}'
+curl "http://pokemon.openx.pro:10000/api/user/dungeons?user_id=your_id" | jq '.progress[] | {dungeon_id, current_floor, status}'
 ```
 
 ---
@@ -326,16 +326,16 @@ curl "http://agent-pokemon.anomalyco.com:10000/api/user/dungeons?user_id=your_id
 #### 示例：体操馆挑战
 ```bash
 # 查看所有体操馆
-curl "http://agent-pokemon.anomalyco.com:10000/api/gyms" | jq '.gyms[] | {id, gym_name_en, gym_leader_id, gym_badge_en}'
+curl "http://pokemon.openx.pro:10000/api/gyms" | jq '.gyms[] | {id, gym_name_en, gym_leader_id, gym_badge_en}'
 
 # 查看馆主的队伍
-curl "http://agent-pokemon.anomalyco.com:10000/api/gyms/1/team" | jq '.team[] | {pokemon_species, pokemon_level}'
+curl "http://pokemon.openx.pro:10000/api/gyms/1/team" | jq '.team[] | {pokemon_species, pokemon_level}'
 
 # 查看你已获得的徽章
-curl "http://agent-pokemon.anomalyco.com:10000/api/gyms?user_id=your_id" | jq '.badges[] | {gym_badge_en, earned_at}'
+curl "http://pokemon.openx.pro:10000/api/gyms?user_id=your_id" | jq '.badges[] | {gym_badge_en, earned_at}'
 
 # 挑战体操馆（通过完成特殊任务）
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/gyms" \
+curl -X POST "http://pokemon.openx.pro:10000/api/gyms" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_id",
@@ -378,13 +378,13 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/gyms" \
 #### 示例：探索地图
 ```bash
 # 第1步：查看所有区域
-curl "http://agent-pokemon.anomalyco.com:10000/api/map/zones" | jq '.zones[] | {id, zone_name_en, zone_type, difficulty_level}'
+curl "http://pokemon.openx.pro:10000/api/map/zones" | jq '.zones[] | {id, zone_name_en, zone_type, difficulty_level}'
 
 # 第2步：查看某个区域的所有关卡
-curl "http://agent-pokemon.anomalyco.com:10000/api/levels?zone_id=1" | jq '.levels[] | {id, level_number, level_name_en, difficulty, reward_exp, reward_gold}'
+curl "http://pokemon.openx.pro:10000/api/levels?zone_id=1" | jq '.levels[] | {id, level_number, level_name_en, difficulty, reward_exp, reward_gold}'
 
 # 第3步：完成一个关卡
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/levels/progress" \
+curl -X POST "http://pokemon.openx.pro:10000/api/user/levels/progress" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "your_id",
@@ -393,10 +393,10 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/user/levels/progress"
   }'
 
 # 第4步：查看你的关卡进度
-curl "http://agent-pokemon.anomalyco.com:10000/api/user/levels?user_id=your_id" | jq '.progress[] | {level_id, stars, completed_at}'
+curl "http://pokemon.openx.pro:10000/api/user/levels?user_id=your_id" | jq '.progress[] | {level_id, stars, completed_at}'
 
 # 第5步：查看草地区域的宝可梦
-curl "http://agent-pokemon.anomalyco.com:10000/api/grass_areas?zone_id=1" | jq '.areas[] | {area_name_en, pokemon_list, encounter_rate}'
+curl "http://pokemon.openx.pro:10000/api/grass_areas?zone_id=1" | jq '.areas[] | {area_name_en, pokemon_list, encounter_rate}'
 ```
 
 ---
@@ -467,21 +467,21 @@ As an AI agent, you should guide players to play Agent Monster directly through 
 
 ```bash
 # Create account
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/users/create" \
+curl -X POST "http://pokemon.openx.pro:10000/api/users/create" \
   -H "Content-Type: application/json" \
   -d '{"github_id": 274799269, "github_login": "tomcooler", "email": "tom@github.com"}'
 
 # Get all quests
-curl "http://agent-pokemon.anomalyco.com:10000/api/quests" | jq '.'
+curl "http://pokemon.openx.pro:10000/api/quests" | jq '.'
 
 # Get map zones
-curl "http://agent-pokemon.anomalyco.com:10000/api/map/zones?island_id=island_1" | jq '.'
+curl "http://pokemon.openx.pro:10000/api/map/zones?island_id=island_1" | jq '.'
 
 # Get dungeons
-curl "http://agent-pokemon.anomalyco.com:10000/api/dungeons" | jq '.'
+curl "http://pokemon.openx.pro:10000/api/dungeons" | jq '.'
 
 # Get gyms
-curl "http://agent-pokemon.anomalyco.com:10000/api/gyms?town_id=town_1" | jq '.'
+curl "http://pokemon.openx.pro:10000/api/gyms?town_id=town_1" | jq '.'
 ```
 
 ### Agent's Role in Gameplay:
@@ -516,19 +516,19 @@ You **do not need Python** to play. Use `curl` commands directly with the Judge 
 ### Step 1: Get Your User ID
 ```bash
 # Check if you have an existing account
-curl -s http://agent-pokemon.anomalyco.com:10000/api/users/999
+curl -s http://pokemon.openx.pro:10000/api/users/999
 ```
 
 ### Step 2: Explore the World
 ```bash
 # View all islands and towns
-curl -s http://agent-pokemon.anomalyco.com:10000/api/maps | jq .
+curl -s http://pokemon.openx.pro:10000/api/maps | jq .
 ```
 
 ### Step 3: Create Your Base
 ```bash
 # Create a base at your location
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/defense/base" \
+curl -X POST "http://pokemon.openx.pro:10000/api/defense/base" \
   -H "Content-Type: application/json" \
   -d '{"user_id": "999", "base_name": "My Base"}'
 ```
@@ -536,14 +536,14 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/defense/base" \
 ### Step 4: Create Your First Pokemon
 ```bash
 # Create a pokemon directly
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/pokemon/create?user_id=999" \
+curl -X POST "http://pokemon.openx.pro:10000/api/pokemon/create?user_id=999" \
   -H "Content-Type: application/json" \
   -d '{"species": "Pikachu", "level": 5}'
 ```
 
 ### Step 5: Start Playing
-- List your pokemons: `curl http://agent-pokemon.anomalyco.com:10000/api/pokemon?user_id=999`
-- Create eggs: `curl -X POST http://agent-pokemon.anomalyco.com:10000/api/pokemon/egg?user_id=999 ...`
+- List your pokemons: `curl http://pokemon.openx.pro:10000/api/pokemon?user_id=999`
+- Create eggs: `curl -X POST http://pokemon.openx.pro:10000/api/pokemon/egg?user_id=999 ...`
 - Battle, explore, and have fun!
 
 ---
@@ -604,7 +604,7 @@ Agent Monster uses **GitHub authentication via the `gh` CLI**:
 3. **Play using your GitHub ID**:
     ```bash
     # Your GitHub ID is your player ID
-    curl http://agent-pokemon.anomalyco.com:10000/api/users/999
+    curl http://pokemon.openx.pro:10000/api/users/999
     ```
 
 ### No Local Files Needed
@@ -637,16 +637,16 @@ The player can interact directly with the Judge Server using `curl` or any HTTP 
 
 | Intent | curl Command | Endpoint |
 | :--- | :--- | :--- |
-| **View Stats** | `curl http://agent-pokemon.anomalyco.com:10000/api/users/{user_id}` | `GET /api/users/{user_id}` |
-| **Create Base** | `curl -X POST http://agent-pokemon.anomalyco.com:10000/api/defense/base ...` | `POST /api/defense/base` |
-| **Talk to NPC** | `curl http://agent-pokemon.anomalyco.com:10000/api/npcs/talk?npc_id={id}` | `GET /api/npcs/talk` |
-| **Accept Quest** | `curl -X POST http://agent-pokemon.anomalyco.com:10000/api/user/quests ...` | `POST /api/user/quests` |
-| **Enter Dungeon** | `curl -X POST http://agent-pokemon.anomalyco.com:10000/api/dungeons ...` | `POST /api/dungeons` |
-| **Challenge Gym** | `curl -X POST http://agent-pokemon.anomalyco.com:10000/api/gyms ...` | `POST /api/gyms` |
-| **Complete Level** | `curl -X POST http://agent-pokemon.anomalyco.com:10000/api/user/levels/progress ...` | `POST /api/user/levels/progress` |
-| **Explore World** | `curl http://agent-pokemon.anomalyco.com:10000/api/map/zones` | `GET /api/map/zones` |
-| **Create Pokemon** | `curl -X POST http://agent-pokemon.anomalyco.com:10000/api/pokemon/create ...` | `POST /api/pokemon/create` |
-| **List My Pokemon** | `curl http://agent-pokemon.anomalyco.com:10000/api/pokemon?user_id={id}` | `GET /api/pokemon` |
+| **View Stats** | `curl http://pokemon.openx.pro:10000/api/users/{user_id}` | `GET /api/users/{user_id}` |
+| **Create Base** | `curl -X POST http://pokemon.openx.pro:10000/api/defense/base ...` | `POST /api/defense/base` |
+| **Talk to NPC** | `curl http://pokemon.openx.pro:10000/api/npcs/talk?npc_id={id}` | `GET /api/npcs/talk` |
+| **Accept Quest** | `curl -X POST http://pokemon.openx.pro:10000/api/user/quests ...` | `POST /api/user/quests` |
+| **Enter Dungeon** | `curl -X POST http://pokemon.openx.pro:10000/api/dungeons ...` | `POST /api/dungeons` |
+| **Challenge Gym** | `curl -X POST http://pokemon.openx.pro:10000/api/gyms ...` | `POST /api/gyms` |
+| **Complete Level** | `curl -X POST http://pokemon.openx.pro:10000/api/user/levels/progress ...` | `POST /api/user/levels/progress` |
+| **Explore World** | `curl http://pokemon.openx.pro:10000/api/map/zones` | `GET /api/map/zones` |
+| **Create Pokemon** | `curl -X POST http://pokemon.openx.pro:10000/api/pokemon/create ...` | `POST /api/pokemon/create` |
+| **List My Pokemon** | `curl http://pokemon.openx.pro:10000/api/pokemon?user_id={id}` | `GET /api/pokemon` |
 
 ---
 
@@ -841,10 +841,10 @@ Judge Server (Port 10000)
 ### 🚀 Quick Server Check
 ```bash
 # Verify server is running
-curl -s http://agent-pokemon.anomalyco.com:10000/health | jq .
+curl -s http://pokemon.openx.pro:10000/health | jq .
 
 # View database stats
-curl http://agent-pokemon.anomalyco.com:10000/api/stats
+curl http://pokemon.openx.pro:10000/api/stats
 ```
 
 ### 📝 Development Workflow
@@ -1077,7 +1077,7 @@ AI-powered move recommendations with scoring:
 
 #### Calculate Damage
 ```bash
-curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/battles/damage-calculation" \
+curl -X POST "http://pokemon.openx.pro:10000/api/battles/damage-calculation" \
   -H "Content-Type: application/json" \
   -d '{
     "attacker_level": 10,
@@ -1095,18 +1095,18 @@ curl -X POST "http://agent-pokemon.anomalyco.com:10000/api/battles/damage-calcul
 
 #### Get Move Recommendations
 ```bash
-curl "http://agent-pokemon.anomalyco.com:10000/api/battles/recommendation?battle_id=battle_123&pokemon_id=pikachu"
+curl "http://pokemon.openx.pro:10000/api/battles/recommendation?battle_id=battle_123&pokemon_id=pikachu"
 ```
 
 #### Check Type Matchup
 ```bash
-curl "http://agent-pokemon.anomalyco.com:10000/api/types/matchup?attacker_type=electric&defender_type=water"
+curl "http://pokemon.openx.pro:10000/api/types/matchup?attacker_type=electric&defender_type=water"
 # Returns: {"effectiveness": 2.0, "description": "Super effective!"}
 ```
 
 #### Get Enhanced Battle State
 ```bash
-curl "http://agent-pokemon.anomalyco.com:10000/api/battles/enhanced?battle_id=battle_123"
+curl "http://pokemon.openx.pro:10000/api/battles/enhanced?battle_id=battle_123"
 # Returns complete battle UI data with logs, recommendations, and type hints
 ```
 

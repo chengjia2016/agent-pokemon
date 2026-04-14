@@ -31,7 +31,7 @@
 
 变更内容:
 ```
-- 所有 http://localhost:10000 → http://agent-pokemon.anomalyco.com:10000
+- 所有 http://localhost:10000 → http://pokemon.openx.pro:10000
 - 添加项目信息头部 (第 8-16 行)
 - 添加 Fork 指南 (第 22-26 行)
 - 所有 API 示例已更新
@@ -43,7 +43,7 @@
 
 - **原始项目**: https://github.com/anomalyco/petskill
 - **Fork 项目**: https://github.com/chengjia2016/agent-pokemon
-- **服务器地址**: http://agent-pokemon.anomalyco.com:10000
+- **服务器地址**: http://pokemon.openx.pro:10000
 - **开发者**: chengjia2016
 ```
 
@@ -85,7 +85,7 @@
 
 ### 公网地址
 ```
-http://agent-pokemon.anomalyco.com:10000
+http://pokemon.openx.pro:10000
 ```
 
 ### 主要 API 端点
@@ -122,7 +122,7 @@ database:
 新玩家应该:
 1. Fork 项目到个人 GitHub: https://github.com/chengjia2016/agent-pokemon
 2. 修改 skill.md 中的 Fork 来源为自己的仓库
-3. 使用公网服务器: http://agent-pokemon.anomalyco.com:10000
+3. 使用公网服务器: http://pokemon.openx.pro:10000
 
 ## 🧪 质量保证
 
