@@ -1,0 +1,40 @@
+# Judge Server (local development only)
+judge-server/
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.out
+*.exe
+*.dll
+*.dylib
+
+# Binaries
+/judge-server/judge-server
+/judge-server/judge-server-auth
+/judge-server/main
+
+# Logs
+*.log
+judge-server.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build cache
+.ruff_cache/
