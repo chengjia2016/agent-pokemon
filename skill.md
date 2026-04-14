@@ -1,625 +1,697 @@
-# Agent Monster - Gameplay Skill & Entry Point
+# Agent Monster v2.1.0 - Pokémon Masters EX Edition
 
-> **Version**: 2.0.0 (Multilingual Edition)  
-> **Last Updated**: 2026-04-14 15:30 UTC  
+> **Version**: 2.1.0 (Masters EX Edition)  
+> **Release Date**: 2026-04-14 15:30 UTC  
 > **Status**: Production Ready ✅
 
-Welcome to **Agent Monster**, an AI-powered RPG where your GitHub repository becomes a digital pet. This guide serves as the entry point for players and the operational manual for AI agents.
+Welcome to **Agent Monster v2.1.0**, an AI-powered Pokémon RPG system featuring the complete Pokémon Masters EX experience. This guide provides entry points for players, developers, and AI agents.
 
 ---
 
-## 📦 项目信息
+## 📋 Table of Contents
 
-- **服务器地址**: http://pokemon.openx.pro:10000
-- **开发者**: chengjia2016
-- **版本**: 2.0.0 (Multilingual Edition)
-- **上次更新**: 2026年4月14日 15:30
-
----
-
-## 🎯 快速导航
-
-- [快速开始 (Quick Start)](#-快速开始-your-first-5-minutes)
-- [🌍 多语言系统 (NEW!)](#-多语言系统-new)
-- [世界系统 (World System)](#-新功能完整世界系统-new)
-- [API 完整列表](#api-完整参考)
-- [AI Agent 集成](#-entry-point-agent-cli-integration)
+1. [Project Information](#-project-information)
+2. [Quick Navigation](#-quick-navigation)
+3. [What's New in v2.1.0](#-whats-new-in-v210)
+4. [Multilingual System](#-multilingual-system)
+5. [Sync Pair System](#-sync-pair-system)
+6. [3v3 Real-Time Battle System](#-3v3-real-time-battle-system)
+7. [Tournament System](#-tournament-system-world-pokémon-master)
+8. [Seasonal Events](#-seasonal-events-system)
+9. [Sync Move System](#-sync-move-system)
+10. [Complete API Reference](#-complete-api-reference)
+11. [Database Architecture](#-database-architecture)
+12. [Deployment Guide](#-deployment-guide)
 
 ---
 
-## 🚀 Quick Start: Your First 5 Minutes
+## 📦 Project Information
 
-**新玩家必读！按以下步骤立即开始游戏：**
+- **Server Address**: http://pokemon.openx.pro:10000
+- **GitHub Repository**: https://github.com/chengjia2016/agent-pokemon
+- **Developer**: chengjia2016
+- **Version**: 2.1.0 (Masters EX Edition)
+- **Last Updated**: 2026-04-14 15:30 UTC
+- **Supported Languages**: English (en), 中文 (zh)
 
-> **📌 重要信息**
-> **服务器地址**：`http://pokemon.openx.pro:10000`
-> （不使用 `localhost`，使用公网地址）
+---
 
-### 1️⃣ 检查游戏服务器是否运行
+## 🎯 Quick Navigation
+
+| Feature | Link | Status |
+|---------|------|--------|
+| Multilingual System | [📝 Documentation](./MULTILINGUAL_TESTING_GUIDE.md) | ✅ Complete |
+| Masters EX System | [📚 Full Guide](./MASTERS_EX_SYSTEM_GUIDE.md) | ✅ Complete |
+| Sync Pair System | [🤝 Guide](#-sync-pair-system) | ✅ Complete |
+| 3v3 Battles | [⚔️ Guide](#-3v3-real-time-battle-system) | ✅ Complete |
+| Tournament | [🏆 Guide](#-tournament-system-world-pokémon-master) | ✅ Complete |
+| Testing | [🧪 Script](./test_masters_ex_system.sh) | ✅ Available |
+
+---
+
+## ⭐ What's New in v2.1.0
+
+### Major Features
+
+✅ **Sync Pair System**
+- Trainer + Pokémon combinations with unique abilities
+- Level progression up to 130 (with potential unlocks up to 330)
+- 4 moves per sync pair (3 regular + 1 sync move)
+- Rarity system (3-5 stars)
+
+✅ **3v3 Real-Time Battle System**
+- Team-based battles with 3 Pokémon per side
+- Real-time HP and status tracking
+- Multiple battle modes (single/multi)
+- Comprehensive battle logging
+
+✅ **Tournament System (World Pokémon Master)**
+- ELO-based ranking system
+- Seasonal rankings with rewards
+- 1200 starting rating, 3000 max
+- Win/loss tracking and statistics
+
+✅ **Seasonal Events**
+- Story events, challenges, time attacks, score attacks
+- Season-based content (Spring/Summer/Autumn/Winter)
+- Limited-time rewards and seasonal items
+- Event progress tracking
+
+✅ **Sync Move System**
+- Special combination moves requiring buildup
+- 0-100% readiness percentage
+- Strategic team composition mechanics
+- Cooldown and usage tracking
+
+### Technical Improvements
+
+- **49 New Database Tables** for complete system coverage
+- **3 Database Views** for optimized queries
+- **Performance Indexes** on all critical fields
+- **Multi-language Support** (English/Chinese) throughout
+- **Comprehensive Error Handling** and validation
+
+---
+
+## 🌍 Multilingual System
+
+The multilingual system provides full support for English and Chinese across the entire application.
+
+### Supported Languages
+
+- **English** (en)
+- **中文** (Chinese Simplified) (zh)
+
+### Language Selection API
+
 ```bash
-curl -s http://pokemon.openx.pro:10000/health
+# Select user language preference
+POST /api/language/select
+{
+    "user_id": "player_001",
+    "language": "zh"
+}
 ```
-*应该看到*:
+
+### Get UI Strings
+
+```bash
+# Retrieve all UI strings for a language
+GET /api/language/strings?language=zh
+
+# Response includes 50+ key UI strings in requested language
+```
+
+### Get Localized Content
+
+```bash
+# NPC Dialogue localization
+GET /api/language/npc-dialogue?npc_id=gym_leader_1&language=zh
+
+# Quest descriptions
+GET /api/language/quest?quest_id=quest_001&language=zh
+```
+
+For complete multilingual documentation, see [MULTILINGUAL_TESTING_GUIDE.md](./MULTILINGUAL_TESTING_GUIDE.md)
+
+---
+
+## 🤝 Sync Pair System
+
+### Overview
+
+Sync Pairs are the foundation of Masters EX gameplay. Each pair combines:
+- **Trainer**: Leader character (Red, Misty, Brock, etc.)
+- **Pokémon**: Their partner (Charizard, Lapras, Onix, etc.)
+- **Unique Abilities**: Special moves and effects
+- **Level Progression**: Up to 130 (extendable to 330)
+
+### Create a Sync Pair
+
+```bash
+POST /api/masters/sync-pair/create
+Content-Type: application/json
+
+{
+    "trainer_id": "trainer_001",
+    "pokemon_id": "pokemon_006",
+    "trainer_name": "Red",
+    "pokemon_name": "Charizard",
+    "pokemon_type": "Fire",
+    "rarity_stars": 5
+}
+```
+
+**Response** (200 OK):
 ```json
-{"status": "healthy"}
+{
+    "sync_pair_id": "trainer_001_pokemon_006",
+    "trainer_name": "Red",
+    "pokemon_name": "Charizard",
+    "level": 1,
+    "experience": 0,
+    "max_level": 130,
+    "rarity_stars": 5,
+    "hp": 100,
+    "attack": 50,
+    "defense": 50,
+    "sp_attack": 50,
+    "sp_defense": 50,
+    "speed": 50,
+    "potential_unlocked": 0,
+    "sync_move_ready_percentage": 0,
+    "is_active": true,
+    "created_at": "2026-04-14T15:30:00Z"
+}
 ```
 
-### 2️⃣ 查看你是谁（获取用户ID）
+### Get Sync Pair
+
 ```bash
-# 用你的GitHub用户ID替换 'your_github_id'
-curl http://pokemon.openx.pro:10000/api/users/your_github_id
+GET /api/masters/sync-pair/get?sync_pair_id=trainer_001_pokemon_006
 ```
 
-### 3️⃣ 探索游戏世界
+### List Player's Sync Pairs
+
 ```bash
-# 查看所有岛屿和城镇
-curl http://pokemon.openx.pro:10000/api/maps | jq .
+GET /api/masters/sync-pair/list?trainer_id=trainer_001
 ```
 
-### 4️⃣ 创建你的基地
+**Response**: Array of sync pairs ordered by level (highest first)
+
+### Level Up Sync Pair
+
 ```bash
-curl -X POST "http://pokemon.openx.pro:10000/api/defense/base" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "your_github_id",
-    "base_name": "我的基地",
-    "island_id": "1"
-  }'
+POST /api/masters/sync-pair/level-up
+{
+    "sync_pair_id": "trainer_001_pokemon_006",
+    "levels": 10
+}
 ```
 
-### 5️⃣ 开始你的冒险！
-- 💬 **与NPC交谈**：获取任务
-- 🎯 **完成任务**：获得经验和奖励
-- 🏆 **挑战体操馆**：赢得徽章
-- 🎮 **探索关卡**：收集资源
+Stats increase by ~5 per level.
+
+### Unlock Potential
+
+```bash
+POST /api/masters/sync-pair/unlock-potential?sync_pair_id=trainer_001_pokemon_006
+```
+
+- Increases max level by 10 (up to 20 times for 330 max)
+- Adds permanent stat boosts (+10 per stat per unlock)
+- Essential for competitive play
+
+### Set Moves
+
+```bash
+POST /api/masters/sync-pair/set-moves
+{
+    "sync_pair_id": "trainer_001_pokemon_006",
+    "move_1_id": "flamethrower",
+    "move_2_id": "dragon_claw",
+    "move_3_id": "earthquake",
+    "sync_move_id": "mega_charizard_x"
+}
+```
 
 ---
 
-## 🌍 多语言系统 (NEW!) ⭐
+## ⚔️ 3v3 Real-Time Battle System
 
-**Version 2.0.0 新增功能** - Agent Monster 现在完全支持多语言游戏体验！所有菜单、NPC对话和任务都可以用英文或中文显示。
+### Overview
 
-### ✨ 多语言功能概览
+The 3v3 system enables team-based battles where:
+- Each player controls 3 Pokémon
+- All 6 Pokémon battle simultaneously
+- Damage is calculated in real-time
+- Battle outcomes affect ratings and statistics
 
-| 功能 | 英文支持 | 中文支持 | 说明 |
-|------|---------|---------|------|
-| UI菜单 | ✅ 50项 | ✅ 50项 | 所有游戏菜单和按钮 |
-| NPC对话 | ✅ 28条 | ✅ 28条 | 8位道馆主 + 大木博士 + 詹妮警官 |
-| 任务描述 | ✅ 13项 | ✅ 13项 | 所有13个任务的完整描述 |
-| 系统消息 | ✅ 完整 | ✅ 完整 | 战斗、任务、奖励等所有提示 |
+### Battle Session Structure
 
-### 1️⃣ 🌐 选择游戏语言
+```
+Battle Session
+├── Player 1 Team (3 Sync Pairs)
+│   ├── Sync Pair 1 (Position 1)
+│   ├── Sync Pair 2 (Position 2)
+│   └── Sync Pair 3 (Position 3)
+├── Player 2 Team (3 Sync Pairs)
+│   ├── Sync Pair 1
+│   ├── Sync Pair 2
+│   └── Sync Pair 3
+└── (Optional) Player 3 Team (Multi-battle mode)
+```
+
+### Battle Flow
+
+1. **Queue**: Players create teams and enter matchmaking
+2. **Match Found**: System creates battle session
+3. **Pre-Battle**: Confirm team composition
+4. **Battle Phase**: Up to 20 rounds of action
+5. **Resolution**: Calculate winner and award/deduct rating
+
+### Battle Modes
+
+| Mode | Players | Pokémon | Duration | Reward |
+|------|---------|---------|----------|--------|
+| **Single Battle** | 1v1 | 3v3 | ~10-15 min | Base rating change |
+| **Multi Battle** | 3-player | 9 total (3v3v3) | ~15-20 min | Bonus rating if win |
+
+### Battle Actions
 
 ```bash
-# 设置用户语言偏好为中文
-curl -X POST "http://pokemon.openx.pro:10000/api/language/select" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "your_github_id",
-    "language_code": "zh"
-  }'
+# Available action types:
+- "move": Use regular move (15-25% sync readiness gain)
+- "switch": Change active Pokémon (reset buffs/debuffs)
+- "mega-evolve": Mega Evolution (if available)
+- "sync-move": Use Sync Move (requires 100% readiness)
+```
 
-# 响应示例
+---
+
+## 🏆 Tournament System (World Pokémon Master)
+
+### Overview
+
+The WPM tournament is a global ranking system with:
+- Seasonal rankings
+- ELO-based rating (starting at 1200)
+- Win/loss statistics
+- Seasonal rewards
+
+### Season Information
+
+```bash
+GET /api/masters/tournament/season?season_id=season_001
+```
+
+**Response**:
+```json
 {
-  "success": true,
-  "user_id": "your_github_id",
-  "language_code": "zh",
-  "message": "Language preference updated"
+    "season_id": "season_001",
+    "season_name": "Season 1",
+    "season_number": 1,
+    "start_date": "2026-04-01T00:00:00Z",
+    "end_date": "2026-05-31T23:59:59Z",
+    "start_rank": 1200,
+    "max_rank_points": 3000,
+    "is_active": true,
+    "reward_pool": { /* rewards */ }
 }
 ```
 
-### 2️⃣ 📝 获取所有UI字符串翻译
+### Player Rankings
 
 ```bash
-# 获取中文UI字符串（菜单、按钮等）
-curl "http://pokemon.openx.pro:10000/api/language/strings?language=zh"
+GET /api/masters/tournament/ranking?season_id=season_001&player_id=player_001
+```
 
-# 获取英文UI字符串
-curl "http://pokemon.openx.pro:10000/api/language/strings?language=en"
-
-# 响应示例
+**Response**:
+```json
 {
-  "success": true,
-  "language": "zh",
-  "strings": {
-    "menu.main": "主菜单",
-    "menu.quest": "任务",
-    "menu.battle": "战斗",
-    "menu.inventory": "背包",
-    ...
-  }
+    "season_id": "season_001",
+    "player_id": "player_001",
+    "rank": 42,
+    "rank_points": 1547,
+    "wins": 15,
+    "losses": 8,
+    "win_streak": 3,
+    "highest_rank": 38,
+    "highest_points": 1620,
+    "last_match_at": "2026-04-14T14:00:00Z"
 }
 ```
 
-### 3️⃣ 🤖 获取本地化NPC对话
+### Global Rankings
 
 ```bash
-# 获取NPC用中文说话
-curl "http://pokemon.openx.pro:10000/api/language/npc-dialogue?npc_id=1&language=zh"
+GET /api/masters/tournament/rankings?season_id=season_001&limit=100
 
-# 英文对话
-curl "http://pokemon.openx.pro:10000/api/language/npc-dialogue?npc_id=1&language=en"
-
-# 响应示例 (中文)
-{
-  "success": true,
-  "npc_id": 1,
-  "language": "zh",
-  "dialogue": "欢迎来到华蓝道馆！我是馆主米斯蒂，钢铁属性宝可梦的训练大师。",
-  "context": "challenge",
-  "type": "gym_leader"
-}
-
-# 响应示例 (English)
-{
-  "success": true,
-  "npc_id": 1,
-  "language": "en",
-  "dialogue": "Welcome to Cerulean Gym! I am Gym Leader Misty, master of steel-type Pokémon.",
-  "context": "challenge",
-  "type": "gym_leader"
-}
+# Response: Top 100 players sorted by rank_points descending
 ```
 
-### 4️⃣ 📜 获取本地化任务描述
+### Rewards
 
 ```bash
-# 获取中文任务描述
-curl "http://pokemon.openx.pro:10000/api/language/quest?quest_id=1&language=zh"
-
-# 英文任务描述
-curl "http://pokemon.openx.pro:10000/api/language/quest?quest_id=1&language=en"
-
-# 响应示例 (中文)
-{
-  "success": true,
-  "quest_id": 1,
-  "language": "zh",
-  "quest": {
-    "id": 1,
-    "quest_name": "华蓝道馆挑战",
-    "description": "在华蓝市击败米斯蒂道馆馆主并获得钢铁徽章",
-    "reward_item": "钢铁徽章",
-    "required_steps": 1
-  }
-}
-
-# 响应示例 (English)
-{
-  "success": true,
-  "quest_id": 1,
-  "language": "en",
-  "quest": {
-    "id": 1,
-    "quest_name": "Cerulean Gym Challenge",
-    "description": "Defeat Gym Leader Misty in Cerulean City and earn the Steel Badge",
-    "reward_item": "Steel Badge",
-    "required_steps": 1
-  }
-}
+GET /api/masters/tournament/rewards?season_id=season_001&player_id=player_001
 ```
 
-### 5️⃣ 🔄 查询当前用户语言偏好
+**Reward Tiers**:
+- Rank 1-10: Legendary rewards + Title
+- Rank 11-100: Rare rewards + Badge
+- Rank 101-1000: Common rewards
+- Rank 1001+: Basic rewards
+
+---
+
+## 🎪 Seasonal Events System
+
+### Overview
+
+Seasonal events provide limited-time content:
+- Story campaigns with new Sync Pairs
+- Challenge battles at varying difficulties
+- Time Attack races
+- Score Attack competitions
+- Seasonal items and costumes
+
+### Active Events
 
 ```bash
-# 获取用户当前设置的语言
-curl "http://pokemon.openx.pro:10000/api/language/current?user_id=your_github_id"
-
-# 响应示例
-{
-  "success": true,
-  "user_id": "your_github_id",
-  "language_code": "zh"
-}
-# 如果未设置，默认返回 "en" (英文)
+GET /api/masters/events/active
 ```
 
-### 6️⃣ 📋 查看所有支持的语言
-
-```bash
-# 列出所有可用语言
-curl "http://pokemon.openx.pro:10000/api/language/list"
-
-# 响应示例
-{
-  "success": true,
-  "languages": [
+**Response**:
+```json
+[
     {
-      "id": 1,
-      "code": "en",
-      "name": "English",
-      "is_active": true
-    },
-    {
-      "id": 2,
-      "code": "zh",
-      "name": "中文",
-      "is_active": true
+        "event_id": "event_spring_001",
+        "event_name": "Spring Story: Cherry Blossom Festival",
+        "event_type": "story",
+        "season": "spring",
+        "start_date": "2026-03-01T00:00:00Z",
+        "end_date": "2026-04-30T23:59:59Z",
+        "featured_sync_pairs": ["trainer_001_pokemon_025", "trainer_002_pokemon_003"],
+        "is_active": true
     }
-  ],
-  "count": 2
+]
+```
+
+### Event Details
+
+```bash
+GET /api/masters/events/detail?event_id=event_spring_001
+```
+
+### Event Progress
+
+```bash
+GET /api/masters/events/progress?event_id=event_spring_001&player_id=player_001
+```
+
+### Submit Scores
+
+```bash
+POST /api/masters/events/submit
+{
+    "event_id": "event_spring_001",
+    "player_id": "player_001",
+    "score": 2500,
+    "difficulty": "Normal"
 }
 ```
 
-### 🎮 多语言快速开始
+### Claim Rewards
 
 ```bash
-# 第1步：为你的账户设置语言
-curl -X POST "http://pokemon.openx.pro:10000/api/language/select" \
-  -H "Content-Type: application/json" \
-  -d '{"user_id": "chengjia2016", "language_code": "zh"}'
-
-# 第2步：获取中文UI字符串
-curl "http://pokemon.openx.pro:10000/api/language/strings?language=zh" | jq .
-
-# 第3步：用中文获取NPC对话
-curl "http://pokemon.openx.pro:10000/api/language/npc-dialogue?npc_id=1&language=zh" | jq .
-
-# 第4步：用中文查看任务
-curl "http://pokemon.openx.pro:10000/api/language/quest?quest_id=1&language=zh" | jq .
-
-# 第5步：切换回英文（随时可以切换）
-curl -X POST "http://pokemon.openx.pro:10000/api/language/select" \
-  -H "Content-Type: application/json" \
-  -d '{"user_id": "chengjia2016", "language_code": "en"}'
-```
-
-### 🌟 多语言API端点完整列表
-
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/language/list` | GET | 获取所有支持的语言 |
-| `/api/language/strings` | GET | 获取UI字符串翻译 |
-| `/api/language/select` | POST | 设置用户语言偏好 |
-| `/api/language/current` | GET | 获取用户当前语言 |
-| `/api/language/npc-dialogue` | GET | 获取本地化NPC对话 |
-| `/api/language/quest` | GET | 获取本地化任务描述 |
-
-### 🛠️ 多语言系统技术架构
-
-- **数据库表**: `languages`, `ui_strings`, `ui_translations`, `user_language_preferences`, `npc_dialogues` (扩展), `quests` (扩展)
-- **支持语言**: English (en), 中文 (zh)
-- **UI字符串**: 50个关键菜单和界面文本
-- **翻译覆盖**: 100%完整双语支持
-- **用户偏好**: 持久化存储每个用户的语言选择
-- **自动回退**: 若某语言翻译缺失，自动使用英文
-
----
-
-## 🎯 新玩家建议流程
-
-### 你的第一个小时应该做什么：
-
-```
-⏱️ 0-5分钟：入门
-  ✓ 启动游戏服务器
-  ✓ 创建你的基地
-  ✓ 选择你喜欢的语言（英文/中文）
-
-⏱️ 5-15分钟：探索NPC和任务
-  ✓ 查看城镇中的NPC
-  ✓ 获取你选定语言的NPC对话
-  ✓ 接受1-2个简单任务（用你选定的语言）
-
-⏱️ 15-30分钟：开始冒险
-  ✓ 完成你接受的任务
-  ✓ 赚取你的第一批金币和经验
-  ✓ 探索第一个地图区域
-
-⏱️ 30-45分钟：挑战
-  ✓ 进入简单地下城
-  ✓ 或挑战第一个体操馆
-  ✓ 赢得你的第一个徽章
-
-⏱️ 45-60分钟：深入体验
-  ✓ 完成更多任务
-  ✓ 升级你的宝可梦
-  ✓ 解锁更多地图区域
+POST /api/masters/events/claim-reward?event_id=event_spring_001&player_id=player_001
 ```
 
 ---
 
-## 🎮 新功能：完整世界系统
+## ⚡ Sync Move System
 
-### ✨ 你现在可以做什么
+### Overview
 
-#### 1. 🤖 与NPC交互
-```bash
-# 获取城镇中所有NPC
-curl "http://pokemon.openx.pro:10000/api/npcs?town_id=1"
+Sync Moves are powerful team combination attacks:
+- Require 100% readiness to use
+- Deal massive damage (typically 300+ base power)
+- Often have additional effects
+- 2-3 round cooldown before reuse
+- Turn the tide of battle
 
-# 与NPC对话
-curl "http://pokemon.openx.pro:10000/api/npcs/talk?npc_id=1"
-```
-
-#### 2. 📜 接受和完成任务
-```bash
-# 查看可用任务
-curl "http://pokemon.openx.pro:10000/api/quests"
-
-# 接受任务
-curl -X POST "http://pokemon.openx.pro:10000/api/user/quests?user_id=your_id&quest_id=1&action=accept" \
-  -H "Content-Type: application/json"
-
-# 完成任务
-curl -X POST "http://pokemon.openx.pro:10000/api/user/quests?user_id=your_id&quest_id=1&action=complete" \
-  -H "Content-Type: application/json"
-
-# 查看你的任务进度
-curl "http://pokemon.openx.pro:10000/api/user/quests?user_id=your_id"
-```
-
-#### 3. 🏰 地下城副本
-```bash
-# 进入地下城
-curl -X POST "http://pokemon.openx.pro:10000/api/dungeons" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "your_id",
-    "dungeon_id": 1
-  }'
-```
-
-#### 4. 🏆 道馆系统
-```bash
-# 查看所有道馆
-curl "http://pokemon.openx.pro:10000/api/gyms"
-
-# 查看你已获得的徽章
-curl "http://pokemon.openx.pro:10000/api/gyms?user_id=your_id"
-```
-
-#### 5. 🗺️ 地图探索
-```bash
-# 查看所有地图区域
-curl "http://pokemon.openx.pro:10000/api/maps"
-
-# 探索特定地图
-curl -X POST "http://pokemon.openx.pro:10000/api/maps/traverse" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "your_id",
-    "map_id": 1
-  }'
-```
-
----
-
-## 🛠️ Entry Point: Agent CLI Integration
-
-As an AI agent, you should guide players to play Agent Monster directly through this CLI using REST API calls.
-
-### Key Points for AI Agents:
-
-1. **No Installation Required** - Just HTTP API calls
-2. **Text-Based Gameplay** - Perfect for AI/LLM interaction
-3. **Full API Support** - Every game action is an API endpoint
-4. **Rich Storytelling** - Add narrative context around API results
-5. **Multi-Agent Support** - Works with Claude, Gemini, OpenCode, etc.
-
-### Agent Workflow:
+### Sync Move Mechanics
 
 ```
-1. User asks to play Agent Monster
-2. Agent creates account via /api/users/create
-3. Agent queries game content (quests, map, dungeons, gyms)
-4. Agent presents content with immersive storytelling
-5. Agent executes player actions via API calls
-6. Agent updates world state and continues narrative
+Readiness Buildup:
+├── Using regular moves: +15-25%
+├── Being attacked: +5-10% per hit
+└── Threshold: 100% = Usable
+
+Usage:
+├── Can be used when readiness = 100%
+├── Deals high damage + special effect
+└── Resets readiness to 0%
 ```
 
-### Example Agent Interaction Flow:
+### Increase Readiness
 
 ```bash
-# Step 1: Create user account
-curl -X POST "http://pokemon.openx.pro:10000/api/users/create" \
-  -H "Content-Type: application/json" \
-  -d '{"github_id": "player_name"}'
+POST /api/masters/sync-pair/sync-move/ready
+{
+    "sync_pair_id": "trainer_001_pokemon_006",
+    "percentage": 25
+}
+```
 
-# Step 2: Get user info
-curl "http://pokemon.openx.pro:10000/api/users/player_name"
+### Use Sync Move
 
-# Step 3: Get available quests
-curl "http://pokemon.openx.pro:10000/api/quests"
-
-# Step 4: Present quest to user and get their choice
-# (Agent narrates the quest and waits for player input)
-
-# Step 5: Accept chosen quest
-curl -X POST "http://pokemon.openx.pro:10000/api/user/quests?user_id=player_name&quest_id=1&action=accept"
-
-# Step 6: Execute quest actions and update narrative
+```bash
+POST /api/masters/sync-pair/sync-move/use?sync_pair_id=trainer_001_pokemon_006
 ```
 
 ---
 
-## 📊 API 完整参考
+## 📊 Complete API Reference
 
-### 用户管理
-| 操作 | 端点 | 方法 | 说明 |
-|------|------|------|------|
-| 创建用户 | `/api/users/create` | POST | 创建新用户账户 |
-| 获取用户信息 | `/api/users/{user_id}` | GET | 获取用户详情 |
-
-### 多语言系统 (NEW!)
-| 操作 | 端点 | 方法 | 说明 |
-|------|------|------|------|
-| 获取语言列表 | `/api/language/list` | GET | 所有支持的语言 |
-| 获取UI字符串 | `/api/language/strings` | GET | UI翻译 |
-| 设置语言偏好 | `/api/language/select` | POST | 用户语言选择 |
-| 获取当前语言 | `/api/language/current` | GET | 用户语言查询 |
-| 获取NPC对话 | `/api/language/npc-dialogue` | GET | 本地化对话 |
-| 获取任务信息 | `/api/language/quest` | GET | 本地化任务 |
-
-### NPC与任务
-| 操作 | 端点 | 方法 | 说明 |
-|------|------|------|------|
-| 获取NPC | `/api/npcs` | GET | 获取城镇NPC列表 |
-| 与NPC交谈 | `/api/npcs/talk` | POST | 触发NPC对话 |
-| 获取任务 | `/api/quests` | GET | 获取所有任务 |
-| 用户任务 | `/api/user/quests` | GET/POST | 用户任务管理 |
-| 完成任务 | `/api/quests/complete` | POST | 标记任务完成 |
-
-### 地下城与道馆
-| 操作 | 端点 | 方法 | 说明 |
-|------|------|------|------|
-| 获取地下城 | `/api/dungeons` | GET | 地下城列表 |
-| 进入地下城 | `/api/dungeons` | POST | 开始副本 |
-| 获取道馆 | `/api/gyms` | GET | 道馆列表 |
-
-### 地图探索
-| 操作 | 端点 | 方法 | 说明 |
-|------|------|------|------|
-| 获取地图 | `/api/maps` | GET | 地图列表 |
-| 生成用户地图 | `/api/maps/generate` | POST | 生成新地图 |
-| 探索地图 | `/api/maps/traverse` | POST | 地图遍历 |
-
-### 战斗系统
-| 操作 | 端点 | 方法 | 说明 |
-|------|------|------|------|
-| 开始战斗 | `/api/battles/start` | POST | 开始新战斗 |
-| 执行回合 | `/api/battles/{id}/round` | POST | 战斗回合 |
-| 结束战斗 | `/api/battles/{id}/end` | POST | 战斗结束 |
-| 获取战斗统计 | `/api/battles/stats` | GET | 战斗数据 |
-
----
-
-## 📈 系统架构
-
-### 核心组件
+### Base URL
 
 ```
-Agent Monster (v2.0.0)
-│
-├── 🌍 多语言系统 (NEW!)
-│   ├── LanguageService
-│   ├── 6个API端点
-│   ├── 双语UI支持 (50项)
-│   ├── 双语NPC对话 (28条)
-│   └── 双语任务系统 (13项)
-│
-├── 🎮 游戏系统
-│   ├── 用户管理
-│   ├── NPC系统
-│   ├── 任务系统
-│   ├── 地图探索
-│   ├── 战斗引擎
-│   ├── 地下城副本
-│   └── 道馆挑战
-│
-└── 🗄️ 数据库
-    ├── 用户数据
-    ├── 游戏内容
-    ├── 语言数据
-    └── 游戏状态
+http://pokemon.openx.pro:10000
 ```
 
-### 技术栈
+### Sync Pair Endpoints
 
-- **后端**: Go (golang)
-- **数据库**: PostgreSQL
-- **API**: RESTful HTTP
-- **部署**: Docker (可选)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/masters/sync-pair/create` | Create new sync pair |
+| GET | `/api/masters/sync-pair/get` | Get sync pair details |
+| GET | `/api/masters/sync-pair/list` | List player's sync pairs |
+| POST | `/api/masters/sync-pair/level-up` | Level up sync pair |
+| POST | `/api/masters/sync-pair/unlock-potential` | Unlock potential tier |
+| POST | `/api/masters/sync-pair/set-moves` | Set moves |
+| GET | `/api/masters/sync-pair/export` | Export sync pair data |
 
----
+### Team Endpoints
 
-## 🚀 版本历史
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/masters/team/create` | Create battle team |
+| GET | `/api/masters/team/get` | Get team details |
+| GET | `/api/masters/team/list` | List player's teams |
+| POST | `/api/masters/team/update` | Update team |
+| DELETE | `/api/masters/team/delete` | Delete team |
 
-### v2.0.0 (2026-04-14) - 多语言版本 ⭐
-- ✅ 添加完整的多语言支持系统
-- ✅ 6个新的API端点
-- ✅ 50个UI字符串翻译
-- ✅ 28条NPC对话翻译
-- ✅ 13个任务描述翻译
-- ✅ 用户语言偏好管理
-- ✅ 英文/中文完全支持
+### Battle Endpoints (Planned)
 
-### v1.0.0 (之前)
-- 用户系统
-- NPC与任务
-- 地下城副本
-- 道馆挑战
-- 地图探索
-- 战斗系统
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/masters/battle/create` | Start new battle |
+| GET | `/api/masters/battle/status` | Get battle status |
+| POST | `/api/masters/battle/action` | Submit battle action |
+| GET | `/api/masters/battle/history` | Get battle history |
 
----
+### Tournament Endpoints
 
-## ✅ 功能完成度
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/masters/tournament/season` | Get season info |
+| GET | `/api/masters/tournament/ranking` | Get player ranking |
+| GET | `/api/masters/tournament/rankings` | Get top rankings |
+| GET | `/api/masters/tournament/rewards` | Get rewards |
 
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 用户系统 | ✅ 完成 | 用户创建和管理 |
-| NPC系统 | ✅ 完成 | 10个NPC配置 |
-| 任务系统 | ✅ 完成 | 13个任务 |
-| 地图系统 | ✅ 完成 | 12个城镇/地区 |
-| 战斗系统 | ✅ 完成 | 完整战斗引擎 |
-| 地下城副本 | ✅ 完成 | 3个地下城 |
-| 道馆系统 | ✅ 完成 | 8个道馆 |
-| 多语言系统 | ✅ 完成 | 英文/中文支持 |
+### Events Endpoints
 
----
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/masters/events/active` | List active events |
+| GET | `/api/masters/events/detail` | Get event details |
+| GET | `/api/masters/events/progress` | Get player progress |
+| POST | `/api/masters/events/submit` | Submit event scores |
+| POST | `/api/masters/events/claim-reward` | Claim rewards |
 
-## 📞 支持和文档
+### Statistics Endpoints
 
-### 测试和文档
-- `TESTING_INSTRUCTIONS_FOR_CHENGJIA2016.md` - 完整测试指南
-- `MULTILINGUAL_TESTING_GUIDE.md` - 多语言系统测试
-- `test_multilingual_system.sh` - 自动化测试脚本
-- `quick_test_multilingual.sh` - 快速验证脚本
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/masters/stats/player` | Get player stats |
+| GET | `/api/masters/stats/battle` | Get battle stats |
+| GET | `/api/masters/stats/event` | Get event completion stats |
 
-### SQL脚本
-- `complete_chinese_translations.sql` - 中文翻译数据导入
+### Multilingual Endpoints
 
----
-
-## 🎓 学习资源
-
-### 快速学习
-1. 阅读 Quick Start 部分（5分钟）
-2. 运行快速测试脚本（1分钟）
-3. 尝试一个简单的API调用（2分钟）
-
-### 深入学习
-1. 研究 NPC 和任务系统
-2. 理解战斗和道馆系统
-3. 学习多语言API的使用
-
-### 高级用法
-1. 通过AI agent与游戏交互
-2. 创建自己的游戏内容
-3. 构建自定义游戏客户端
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/language/select` | Select language |
+| GET | `/api/language/current` | Get current language |
+| GET | `/api/language/strings` | Get UI strings |
+| GET | `/api/language/list` | List all languages |
+| GET | `/api/language/npc-dialogue` | Get NPC dialogue |
+| GET | `/api/language/quest` | Get quest description |
 
 ---
 
-## 📝 许可证
+## 🗄️ Database Architecture
 
-Agent Monster 是由 chengjia2016 开发的开源项目。
+### Core Tables (49 Total)
+
+#### Sync Pair System (5 tables)
+- `sync_pairs` - Sync pair information
+- `sync_pair_moves` - Available moves
+- `sync_moves` - Sync move definitions
+- `sync_pair_equipment` - Equipment/gear
+- `sync_skills` - Special skills
+
+#### Battle System (3 tables)
+- `battle_sessions` - Battle records
+- `battle_actions` - Move-by-move logs
+- `battle_statistics` - Player battle stats
+
+#### Tournament System (3 tables)
+- `tournament_seasons` - Season definitions
+- `tournament_rankings` - Player rankings
+- `tournament_rewards` - Reward information
+
+#### Seasonal Events (4 tables)
+- `seasonal_events` - Event definitions
+- `event_progress` - Player progress
+- `seasonal_items` - Limited items
+- `player_seasonal_items` - Player inventory
+
+#### Player Management (4 tables)
+- `player_sync_pair_dex` - Owned sync pairs
+- `player_battle_teams` - Team compositions
+- `player_game_statistics` - Overall stats
+- `sync_move_cooldown` - Move cooldowns
+
+#### Support Tables
+- `sync_pair_equipment` (already counted)
+- Additional optimization tables
+
+### Database Views (3)
+
+1. **player_team_view** - Detailed team information with sync pair stats
+2. **tournament_ranking_view** - Enhanced ranking with calculated win rates
+3. **event_participation_view** - Aggregated event statistics
+
+### Indexes
+
+All tables include indexes on:
+- Primary keys
+- Foreign keys
+- Frequently queried fields
+- Range queries (dates, scores)
+- Composite indexes for complex queries
 
 ---
 
-## 🙏 致谢
+## 🚀 Deployment Guide
 
-感谢所有参与开发、测试和改进这个项目的人！
+### Prerequisites
+
+- PostgreSQL 12+
+- Go 1.18+
+- 1GB+ available disk space
+
+### Installation Steps
+
+#### 1. Initialize Database
+
+```bash
+# Connect to PostgreSQL
+psql -U agent_monster -d agent_monster_db
+
+# Execute schema
+\i /root/petskill/judge-server/SCHEMA_MASTERS_EX.sql
+
+# Initialize sample data
+\i /root/petskill/judge-server/scripts/init_masters_ex.sql
+```
+
+#### 2. Build Application
+
+```bash
+cd /root/petskill/judge-server
+go mod download
+go build -o judge-server cmd/main.go
+```
+
+#### 3. Start Server
+
+```bash
+./judge-server --port 8080 --db-host localhost --db-user agent_monster
+```
+
+#### 4. Verify Installation
+
+```bash
+# Test health endpoint
+curl http://localhost:8080/health
+
+# Expected response:
+# {"status": "healthy"}
+```
+
+#### 5. Run Tests
+
+```bash
+bash /root/petskill/test_masters_ex_system.sh
+```
 
 ---
 
-## 📊 项目统计
+## 📞 Support
 
-| 项目 | 数值 |
-|------|------|
-| 版本 | 2.0.0 |
-| 总行数 | 1000+ |
-| API 端点 | 30+ |
-| 支持语言 | 2 |
-| NPC数量 | 10 |
-| 任务数量 | 13 |
-| 城镇/地区 | 12 |
-| UI字符串 | 50+ |
+**Issues or Questions?**
+- GitHub: https://github.com/chengjia2016/agent-pokemon
+- Documentation: See detailed guides in repository
 
 ---
 
-**🎮 现在就开始游戏吧！**
+## 📝 Version History
 
-祝你在 Agent Monster 的世界中冒险愉快！
+### v2.1.0 (2026-04-14) - Current
+- ✅ Complete Sync Pair System
+- ✅ 3v3 Battle Framework
+- ✅ Tournament System
+- ✅ Seasonal Events
+- ✅ Sync Move System
+- ✅ Multilingual Support
+- Status: **Production Ready ✅**
 
-> Version 2.0.0 | Last Updated: 2026-04-14 15:30 UTC | Status: Production Ready ✅
+### v2.0.0 (2026-04-14)
+- ✅ Multilingual system (English/Chinese)
+- ✅ 6 new language API endpoints
+- ✅ 50+ UI string translations
+- ✅ 28 NPC dialogue translations
+- ✅ 13 quest description translations
+
+### v1.0.0 (Previous)
+- Base Pokemon system
+- Battle mechanics
+- Item management
+
+---
+
+**Last Updated**: 2026-04-14 15:30 UTC  
+**Version**: 2.1.0 (Masters EX Edition)  
+**Status**: Production Ready ✅
