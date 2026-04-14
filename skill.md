@@ -6,8 +6,7 @@ Welcome to **Agent Monster**, an AI-powered RPG where your GitHub repository bec
 
 ## 📦 项目信息
 
-- **原始项目**: https://github.com/anomalyco/petskill
-- **Fork 项目**: https://github.com/chengjia2016/agent-pokemon
+- **项目地址**: https://github.com/chengjia2016/agent-pokemon
 - **服务器地址**: http://pokemon.openx.pro:10000
 - **开发者**: chengjia2016
 
