@@ -403,12 +403,12 @@ curl "http://pokemon.openx.pro:10000/api/grass_areas?zone_id=1" | jq '.areas[] |
 ⏱️ 0-5分钟：入门
   ✓ 启动游戏服务器
   ✓ 创建你的基地
-  ✓ 查看世界地图
+  ✓ 选择你喜欢的语言（英文/中文）
 
 ⏱️ 5-15分钟：探索NPC和任务
   ✓ 查看城镇中的NPC
-  ✓ 与几个NPC交谈
-  ✓ 接受1-2个简单任务
+  ✓ 获取你选定语言的NPC对话
+  ✓ 接受1-2个简单任务（用你选定的语言）
 
 ⏱️ 15-30分钟：开始冒险
   ✓ 完成你接受的任务
@@ -425,6 +425,189 @@ curl "http://pokemon.openx.pro:10000/api/grass_areas?zone_id=1" | jq '.areas[] |
   ✓ 升级你的宝可梦
   ✓ 解锁更多地图区域
 ```
+
+---
+
+## 🌍 多语言系统 (NEW!)
+
+Agent Monster 现在完全支持多语言游戏体验！所有菜单、NPC对话和任务都可以用英文或中文显示。
+
+### ✨ 多语言功能
+
+#### 1. 🌐 选择游戏语言
+```bash
+# 设置用户语言偏好为中文
+curl -X POST "http://pokemon.openx.pro:10000/api/language/select" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "your_github_id",
+    "language_code": "zh"
+  }'
+
+# 响应示例
+{
+  "success": true,
+  "user_id": "your_github_id",
+  "language_code": "zh",
+  "message": "Language preference updated"
+}
+```
+
+#### 2. 📝 获取所有UI字符串翻译
+```bash
+# 获取中文UI字符串（菜单、按钮等）
+curl "http://pokemon.openx.pro:10000/api/language/strings?language=zh"
+
+# 获取英文UI字符串
+curl "http://pokemon.openx.pro:10000/api/language/strings?language=en"
+
+# 响应示例
+{
+  "success": true,
+  "language": "zh",
+  "strings": {
+    "menu.main": "主菜单",
+    "menu.quest": "任务",
+    "menu.battle": "战斗",
+    "menu.inventory": "背包",
+    ...
+  }
+}
+```
+
+#### 3. 🤖 获取本地化NPC对话
+```bash
+# 获取NPC用中文说话
+curl "http://pokemon.openx.pro:10000/api/language/npc-dialogue?npc_id=1&language=zh"
+
+# 英文对话
+curl "http://pokemon.openx.pro:10000/api/language/npc-dialogue?npc_id=1&language=en"
+
+# 响应示例 (中文)
+{
+  "success": true,
+  "npc_id": 1,
+  "language": "zh",
+  "dialogue": "欢迎来到华蓝道馆！我是馆主米斯蒂，钢铁属性宝可梦的训练大师。",
+  "context": "challenge",
+  "type": "gym_leader"
+}
+```
+
+#### 4. 📜 获取本地化任务描述
+```bash
+# 获取中文任务描述
+curl "http://pokemon.openx.pro:10000/api/language/quest?quest_id=1&language=zh"
+
+# 英文任务描述
+curl "http://pokemon.openx.pro:10000/api/language/quest?quest_id=1&language=en"
+
+# 响应示例 (中文)
+{
+  "success": true,
+  "quest_id": 1,
+  "language": "zh",
+  "quest": {
+    "id": 1,
+    "quest_name": "华蓝道馆挑战",
+    "description": "在华蓝市击败米斯蒂道馆馆主并获得钢铁徽章",
+    "reward_item": "钢铁徽章",
+    "required_steps": 1
+  }
+}
+```
+
+#### 5. 🔄 查询当前用户语言偏好
+```bash
+# 获取用户当前设置的语言
+curl "http://pokemon.openx.pro:10000/api/language/current?user_id=your_github_id"
+
+# 响应示例
+{
+  "success": true,
+  "user_id": "your_github_id",
+  "language_code": "zh"
+}
+# 如果未设置，默认返回 "en" (英文)
+```
+
+#### 6. 📋 查看所有支持的语言
+```bash
+# 列出所有可用语言
+curl "http://pokemon.openx.pro:10000/api/language/list"
+
+# 响应示例
+{
+  "success": true,
+  "languages": [
+    {
+      "id": 1,
+      "code": "en",
+      "name": "English",
+      "is_active": true
+    },
+    {
+      "id": 2,
+      "code": "zh",
+      "name": "中文",
+      "is_active": true
+    }
+  ],
+  "count": 2
+}
+```
+
+### 📊 多语言支持详情
+
+| 功能 | 英文支持 | 中文支持 | 说明 |
+|------|---------|---------|------|
+| UI菜单 | ✅ 50项 | ✅ 50项 | 所有游戏菜单和按钮 |
+| NPC对话 | ✅ 28条 | ✅ 28条 | 8位道馆主 + 大木博士 + 詹妮警官 |
+| 任务描述 | ✅ 13项 | ✅ 13项 | 所有13个任务的完整描述 |
+| 系统消息 | ✅ 完整 | ✅ 完整 | 战斗、任务、奖励等所有提示 |
+
+### 🎮 多语言快速开始
+
+```bash
+# 第1步：为你的账户设置语言
+curl -X POST "http://pokemon.openx.pro:10000/api/language/select" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "chengjia2016", "language_code": "zh"}'
+
+# 第2步：获取中文UI字符串
+curl "http://pokemon.openx.pro:10000/api/language/strings?language=zh" | jq .
+
+# 第3步：用中文获取NPC对话
+curl "http://pokemon.openx.pro:10000/api/language/npc-dialogue?npc_id=1&language=zh" | jq .
+
+# 第4步：用中文查看任务
+curl "http://pokemon.openx.pro:10000/api/language/quest?quest_id=1&language=zh" | jq .
+
+# 第5步：切换回英文（随时可以切换）
+curl -X POST "http://pokemon.openx.pro:10000/api/language/select" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "chengjia2016", "language_code": "en"}'
+```
+
+### 🌟 API端点完整列表
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/api/language/list` | GET | 获取所有支持的语言 |
+| `/api/language/strings` | GET | 获取UI字符串翻译 |
+| `/api/language/select` | POST | 设置用户语言偏好 |
+| `/api/language/current` | GET | 获取用户当前语言 |
+| `/api/language/npc-dialogue` | GET | 获取本地化NPC对话 |
+| `/api/language/quest` | GET | 获取本地化任务描述 |
+
+### 🛠️ 多语言系统技术架构
+
+- **数据库表**: `languages`, `ui_strings`, `ui_translations`, `user_language_preferences`, `npc_dialogues` (扩展), `quests` (扩展)
+- **支持语言**: English (en), 中文 (zh)
+- **UI字符串**: 50个关键菜单和界面文本
+- **翻译覆盖**: 100%完整双语支持
+- **用户偏好**: 持久化存储每个用户的语言选择
+- **自动回退**: 若某语言翻译缺失，自动使用英文
 
 ---
 
