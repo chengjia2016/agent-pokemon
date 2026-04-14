@@ -509,45 +509,6 @@ This includes:
 
 ---
 
-## 🛠️ Quick Start: Play Without Python
-
-You **do not need Python** to play. Use `curl` commands directly with the Judge Server API.
-
-### Step 1: Get Your User ID
-```bash
-# Check if you have an existing account
-curl -s http://pokemon.openx.pro:10000/api/users/999
-```
-
-### Step 2: Explore the World
-```bash
-# View all islands and towns
-curl -s http://pokemon.openx.pro:10000/api/maps | jq .
-```
-
-### Step 3: Create Your Base
-```bash
-# Create a base at your location
-curl -X POST "http://pokemon.openx.pro:10000/api/defense/base" \
-  -H "Content-Type: application/json" \
-  -d '{"user_id": "999", "base_name": "My Base"}'
-```
-
-### Step 4: Create Your First Pokemon
-```bash
-# Create a pokemon directly
-curl -X POST "http://pokemon.openx.pro:10000/api/pokemon/create?user_id=999" \
-  -H "Content-Type: application/json" \
-  -d '{"species": "Pikachu", "level": 5}'
-```
-
-### Step 5: Start Playing
-- List your pokemons: `curl http://pokemon.openx.pro:10000/api/pokemon?user_id=999`
-- Create eggs: `curl -X POST http://pokemon.openx.pro:10000/api/pokemon/egg?user_id=999 ...`
-- Battle, explore, and have fun!
-
----
-
 ## 🛠️ Onboarding Workflow (Traditional Step-by-Step)
 
 For new players following traditional setup:
@@ -561,9 +522,9 @@ For new players following traditional setup:
 
 ---
 
-## 🏗️ Architecture: 100% Server-Authoritative, Zero Local Complexity
+## 🏗️ Architecture: 100% Server-Authoritative
 
-Agent Monster uses a **pure server-authoritative model** with NO local Python or complex setup required.
+Agent Monster uses a **pure server-authoritative model** - everything you need is accessible via HTTP API.
 
 ### Server-Stored Data (Source of Truth)
 All critical game data is stored in the **Judge Server's PostgreSQL Database**:
@@ -575,11 +536,11 @@ All critical game data is stored in the **Judge Server's PostgreSQL Database**:
 - **Map Data**: Islands, towns, and terrain
 - **World System**: NPCs, Quests, Dungeons, Gyms, and Levels (NEW!)
 
-*Access via*: **HTTP REST API calls** (no local files needed)
+*Access via*: **HTTP REST API calls** using `curl` or any HTTP client
 
 ### Client Interaction
 - Use `curl` or any HTTP client to call API endpoints
-- No Python dependencies
+- No local setup required
 - No local session management
 - Completely stateless
 - Works from terminal, scripts, or web browsers
@@ -631,7 +592,7 @@ Just use your GitHub ID to access your account from anywhere!
 
 ## 🎮 Gameplay Mechanics (Using curl & HTTP API)
 
-The player can interact directly with the Judge Server using `curl` or any HTTP client. No Python needed!
+The player can interact directly with the Judge Server using `curl` or any HTTP client.
 
 ### Core Player Actions
 
@@ -652,7 +613,7 @@ The player can interact directly with the Judge Server using `curl` or any HTTP 
 
 ## 🛠️ Judge Server API Reference (Authoritative)
 
-The Judge Server is the **Source of Truth**. You can interact with it directly via `curl` even if Python scripts are missing.
+The Judge Server is the **Source of Truth**. You can interact with it directly via `curl` from anywhere.
 
 ### User Management
 - **Create Account**: `POST /api/users/create`
@@ -720,44 +681,42 @@ Create, breed, and hatch your own pokemon!
 
 ---
 
-## 🧠 AI Agent Usage (No Python Required)
+## 🧠 AI Agent Integration
 
-As an AI agent, you should guide players to use the HTTP API directly via `curl` or other HTTP clients.
+As an AI agent, guide players to use the HTTP API directly via `curl` or other HTTP clients.
 
 ### Direct API Integration
-Instead of using Python MCP tools, call the Judge Server API endpoints directly:
 
 1. **Player asks**: "Who am I?"
-    - Use: `GET /api/users/{user_id}`
+   - Use: `GET /api/users/{user_id}`
 
 2. **Player asks**: "Create my base"
-    - Use: `POST /api/defense/base` with base_name and island_id
+   - Use: `POST /api/defense/base` with base_name and island_id
 
 3. **Player asks**: "Show me the world"
-    - Use: `GET /api/map/zones`
+   - Use: `GET /api/map/zones`
 
 4. **Player asks**: "I want a Pokemon"
-    - Use: `POST /api/pokemon/create` or `POST /api/pokemon/egg`
+   - Use: `POST /api/pokemon/create` or `POST /api/pokemon/egg`
 
 5. **Player asks**: "What quests are available?"
-    - Use: `GET /api/quests`
+   - Use: `GET /api/quests`
 
 6. **Player asks**: "I want to accept a quest"
-    - Use: `POST /api/user/quests?user_id=x&quest_id=x&action=accept`
+   - Use: `POST /api/user/quests?user_id=x&quest_id=x&action=accept`
 
 7. **Player asks**: "Let me explore a dungeon"
-    - Use: `POST /api/dungeons`
+   - Use: `POST /api/dungeons`
 
 8. **Player asks**: "Show me the gyms"
-    - Use: `GET /api/gyms`
+   - Use: `GET /api/gyms`
 
 ### Key Principles
-1. **API-First**: Always use HTTP endpoints, no Python scripts needed
+1. **API-First**: Always use HTTP endpoints
 2. **curl-Friendly**: Provide curl commands players can copy-paste
 3. **Server is Truth**: All game data is stored server-side (PostgreSQL)
 4. **Stateless**: No local session files required
-5. **No Dependencies**: Pure HTTP - works with any client
-6. **World System Ready**: The complete world system is now live and integrated
+5. **World System Ready**: The complete world system is now live and integrated
 
 ---
 
